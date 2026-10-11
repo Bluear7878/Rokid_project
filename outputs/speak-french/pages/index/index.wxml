@@ -24,6 +24,6 @@
   </scroll-view>
   <view ink:if="{{modeChosen}}" class="controls">
     <button class="action" bindtap="onAction" tabindex="0">{{actionLabel}}</button>
-    <text class="hint">탭: 시작·종료 / 밀기: 스크롤 / 뒤로: 취소·닫기</text>
+    <text class="hint">탭: 시작·종료 / 밀기: 스크롤 / 뒤로: 앱 종료</text>
   </view>
 </view>

@@ -6,10 +6,12 @@
 
 | 앱 | 폴더 | 하는 일 |
 |---|---|---|
-| Speak English (영어 통역) | `outputs/speak-english` | 버튼을 누르고 한국어로 말하면 영어 자막으로 번역 |
-| Speak French | `outputs/speak-french` | 한국어 음성을 프랑스어로 번역, 한글로 적은 근사 발음은 선택 |
+| Speak Translate 0.2.0 (통역) | `outputs/speak-english` | 한국어 음성을 영어·중국어(간체)·프랑스어로 번역, 프랑스어 한글 근사 발음 선택 |
+| Speak French 0.1.2 (호환용) | `outputs/speak-french` | 기존 프랑스어 앱 유지, 한 번의 뒤로가기로 종료 요청하도록 수정 |
 
-실제 안경에서의 한국어 음성 인식과 번역은 아직 검증하지 못했습니다. 로컬 검사는 모의 음성·번역 API를 씁니다.
+Speak Translate는 기존 Speak English Agent의 업데이트입니다. 소스 폴더와 기본 명령은 유지합니다. 입력은 한국어(`ko-KR`)로 고정하며, 한국어 메뉴를 버튼·밀기로 조작합니다. 언어 자동 감지와 음성 메뉴 제어는 없습니다. 모든 화면에서 뒤로 한 번으로 앱 종료를 요청합니다. 60초 동안 조작이 없으면 앱은 유지하고 글자만 지웁니다. 다른 언어를 고르려면 앱을 다시 엽니다.
+
+실제 안경의 한국어 음성 인식·번역·속도와 뒤로가기 종료는 아직 검증하지 못했습니다. 로컬 검사는 모의 음성·번역 API를 씁니다.
 
 ## 폴더
 
@@ -41,7 +43,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File $s pack                     
 
 이 저장소를 고쳐도 안경에는 자동으로 반영되지 않습니다.
 
-1. AIUI Studio(https://aiui-global.rokid.com)의 해당 Agent에 소스를 반영하고 AIX Packaging을 실행합니다.
+1. AIUI Studio(https://aiui-global.rokid.com)의 해당 Agent에 소스를 반영하고 AIX Packaging 후 Save Details를 실행합니다. 기존 Speak English의 이름을 Speak Translate로 바꾸며 새 Agent를 만들 필요는 없습니다.
 2. 휴대폰 Hi Rokid 앱에서 Settings > Developer Options > AIUI > Update glasses resource를 실행합니다.
 
 Rokid 개발 케이블이 있으면 `rokid-dev.ps1 install-launch`로 Studio를 거치지 않고 ADB로 설치합니다. 이 경로는 아직 시험하지 못했습니다.

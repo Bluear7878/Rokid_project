@@ -1,8 +1,8 @@
 {
-  "agentName": "영어 통역",
-  "agentDesc": "버튼을 누르고 한국어로 말하면 영어 자막으로 번역합니다.",
-  "agentPrompt": "영어 통역 또는 Speak English를 열어 달라는 요청에 pages/index/index 전체 화면 페이지를 엽니다. 사용자가 버튼을 누른 뒤 말한 한국어를 영어로 번역합니다. 대화로 대신 답변하지 말고 페이지를 사용합니다.",
-  "version": "0.1.1",
+  "agentName": "Speak Translate",
+  "agentDesc": "Button-activated Korean speech translation into English, Simplified Chinese or French, with optional Hangul reading for French.",
+  "agentPrompt": "When asked to open Speak Translate or 통역, open the full-screen pages/index/index page. All controls and instructions are Korean. Speech input is fixed to Korean (ko-KR); never detect or ask for an input language. The user selects the target language using buttons, then starts speech with a button. French output offers optional approximate Hangul reading. Use the interactive page, not a chat answer. Back closes the app; one minute of inactivity only clears the display.",
+  "version": "0.2.0",
   "engine": ">=0.18.0",
   "pages": [
     "pages/index/index"
@@ -11,6 +11,6 @@
     "RECORD_AUDIO"
   ],
   "window": {
-    "navigationBarTitleText": "영어 통역"
+    "navigationBarTitleText": "Speak Translate"
   }
 }

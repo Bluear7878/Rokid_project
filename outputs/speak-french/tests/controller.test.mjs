@@ -119,10 +119,37 @@ await test('Unconfigured web host is distinct from a network failure and release
   action(p); recognitions.at(-1).onerror({error: 'network', message: 'Connection failed'});
   assert.equal(p.data.phase, 'error'); assert.match(p.data.error, /인터넷 연결/); p.onUnload();
 });
-await test('Back cancels active recording, then permits normal exit', () => {
-  const p = page(); action(p); const r = recognitions.at(-1);
-  assert.equal(key(p, 'Backspace'), true); assert.equal(r.aborts, 1);
-  assert.equal(key(p, 'Backspace'), false); p.onUnload();
+await test('One Back releases capture and closes once, ignoring late callbacks and reopening', () => {
+  const p = page(); let closes = 0; globalThis.window = {close() { closes++; }};
+  action(p); const r = recognitions.at(-1), late = r.onresult;
+  assert.equal(key(p, 'Backspace'), true); assert.equal(closes, 1); assert.equal(r.aborts, 1);
+  assert.equal(p._visible, false); assert.equal(p._timer, null); assert.equal(p._screenTimer, null);
+  late({results:[]}); p.onShow(); action(p); assert.equal(p._visible, false);
+  key(p, 'Backspace'); assert.equal(closes, 1); p.onUnload(); delete globalThis.window;
+});
+await test('Back closes menu, idle, result, error and blank screens without debounce', () => {
+  for (const phase of ['choosing','idle','done','error']) {
+    const p = page(); let closes = 0; globalThis.window = {close() { closes++; }};
+    p.setPhase(phase); p._lastAction = Date.now();
+    if (phase === 'idle') p.setData({screenBlank:true});
+    assert.equal(key(p, 'Backspace'), true); assert.equal(closes, 1); assert.equal(p._screenTimer, null);
+    p.onUnload(); delete globalThis.window;
+  }
+});
+await test('Back destroys pending translation and ignores its late result', async () => {
+  const p = page(); let resolvePrompt, closes = 0; globalThis.window = {close() { closes++; }};
+  responseOverride = () => new Promise(resolve => {resolvePrompt=resolve;});
+  action(p); const r=recognitions.at(-1); r.result('안녕하세요.'); r.onend(); await flush();
+  const session=sessions.at(-1); key(p,'Backspace');
+  assert.equal(closes,1); assert.equal(session.destroyed,1);
+  resolvePrompt('late'); await flush(); assert.equal(p._visible,false); assert.equal(session.destroyed,1);
+  p.onUnload(); delete globalThis.window;
+});
+await test('Finish fallback works and failed close leaves native Back available', () => {
+  const p=page(); let finishes=0; p.finish=()=>{finishes++;};
+  assert.equal(key(p,'Backspace'),true); assert.equal(finishes,1); p.onUnload();
+  const q=page(); globalThis.window={close(){throw Error('host');}};
+  assert.equal(key(q,'Backspace'),false); assert.match(q.data.error,/종료/); q.onUnload(); delete globalThis.window;
 });
 await test('Hide cancels capture and ignores an already queued callback', () => {
   const p = page(); action(p); const r = recognitions.at(-1); const late = r.onresult;

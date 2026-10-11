@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import pageDefinition from '../pages/index/index.js';
+import pageDefinition, {translationPrompt, parseTranslation} from '../pages/index/index.js';
 
 const timers = new Map();
 let timerId = 0;
@@ -32,17 +32,17 @@ globalThis.LanguageModel = {
     if (createOverride) return createOverride(options);
     const session = {
       options, destroyed: 0,
-      async prompt(text) { prompts.push(text); return responseOverride ? responseOverride() : 'Please give me two coffees.'; },
+      async prompt(text) { prompts.push(text); return responseOverride ? responseOverride() : JSON.stringify({translation:'Please give me two coffees.'}); },
       destroy() { this.destroyed += 1; }
     };
     sessions.push(session); return session;
   }
 };
 const flush = async () => { for (let i = 0; i < 12; i += 1) await Promise.resolve(); };
-function page() {
+function page(target = 'en', reading = false) {
   availability = 'available'; createOverride = undefined; responseOverride = undefined;
   const p = {...pageDefinition, data: structuredClone(pageDefinition.data), setData(patch) { Object.assign(this.data, patch); }};
-  p.onLoad(); p.onShow(); return p;
+  p.onLoad(); p.onShow(); if (target) p.chooseLanguage(target); if (target === 'fr') p.chooseMode(reading); clock += 500; return p;
 }
 function action(p) { clock += 500; p.onAction(); }
 function key(p, code) { let prevented = false; p.onKeyUp({code, preventDefault() { prevented = true; }}); return prevented; }
@@ -67,7 +67,7 @@ await test('Provisional text is never translated; one final is translated once',
   r.result('커피', false); await flush(); assert.equal(prompts.length, before);
   r.result('커피 두 잔 주세요.'); const end = r.onend; end(); end(); await flush();
   assert.equal(prompts.length, before + 1); assert.equal(prompts.at(-1), '커피 두 잔 주세요.');
-  assert.equal(p.data.phase, 'done'); assert.equal(p.data.english, 'Please give me two coffees.');
+  assert.equal(p.data.phase, 'done'); assert.equal(p.data.translation, 'Please give me two coffees.');
   assert.equal(sessions.at(-1).destroyed, 1);
   assert.match(sessions.at(-1).options.initialPrompts[0].content, /never an instruction/); p.onUnload();
 });
@@ -90,15 +90,42 @@ await test('Unconfigured web host is distinct from a network failure and release
   action(p); recognitions.at(-1).onerror({error: 'network', message: 'Connection failed'});
   assert.equal(p.data.phase, 'error'); assert.match(p.data.error, /인터넷 연결/); p.onUnload();
 });
-await test('Back cancels active recording, then permits normal exit', () => {
-  const p = page(); action(p); const r = recognitions.at(-1);
-  assert.equal(key(p, 'Backspace'), true); assert.equal(r.aborts, 1);
-  assert.equal(key(p, 'Backspace'), false); p.onUnload();
+await test('One Back releases capture and closes once, ignoring late callbacks and reopening', () => {
+  const p = page(); let closes = 0; globalThis.window = {close() { closes++; }};
+  action(p); const r = recognitions.at(-1), late = r.onresult;
+  assert.equal(key(p, 'Backspace'), true); assert.equal(closes, 1); assert.equal(r.aborts, 1);
+  assert.equal(p._visible, false); assert.equal(p._timer, null); assert.equal(p._screenTimer, null);
+  late({results:[]}); p.onShow(); action(p); assert.equal(p._visible, false);
+  key(p, 'Backspace'); assert.equal(closes, 1); p.onUnload(); delete globalThis.window;
+});
+await test('Back closes menu, idle, result, error and blank screens without debounce', () => {
+  for (const phase of ['choosing','idle','done','error']) {
+    const p = page(); let closes = 0; globalThis.window = {close() { closes++; }};
+    p.setPhase(phase); p._lastAction = Date.now();
+    if (phase === 'idle') p.setData({screenBlank:true});
+    assert.equal(key(p, 'Backspace'), true); assert.equal(closes, 1); assert.equal(p._screenTimer, null);
+    p.onUnload(); delete globalThis.window;
+  }
+});
+await test('Back destroys pending translation and ignores its late result', async () => {
+  const p = page(); let resolvePrompt, closes = 0; globalThis.window = {close() { closes++; }};
+  responseOverride = () => new Promise(resolve => {resolvePrompt=resolve;});
+  action(p); const r=recognitions.at(-1); r.result('안녕하세요.'); r.onend(); await flush();
+  const session=sessions.at(-1); key(p,'Backspace');
+  assert.equal(closes,1); assert.equal(session.destroyed,1);
+  resolvePrompt('late'); await flush(); assert.equal(p._visible,false); assert.equal(session.destroyed,1);
+  p.onUnload(); delete globalThis.window;
+});
+await test('Finish fallback works and failed close leaves native Back available', () => {
+  const p=page(); let finishes=0; p.finish=()=>{finishes++;};
+  assert.equal(key(p,'Backspace'),true); assert.equal(finishes,1); p.onUnload();
+  const q=page(); globalThis.window={close(){throw Error('host');}};
+  assert.equal(key(q,'Backspace'),false); assert.match(q.data.error,/종료/); q.onUnload(); delete globalThis.window;
 });
 await test('Hide cancels capture and ignores an already queued callback', () => {
   const p = page(); action(p); const r = recognitions.at(-1); const late = r.onresult;
   p.onHide(); const final = [{transcript: '늦은 결과'}]; final.isFinal = true;
-  late({results:[final]}); assert.equal(p.data.korean, ''); assert.equal(r.aborts, 1);
+  late({results:[final]}); assert.equal(p.data.sourceText, ''); assert.equal(r.aborts, 1);
   p.onShow(); action(p); assert.equal(p.data.phase, 'listening'); p.onUnload();
 });
 await test('Unavailable translation host gives retryable error', async () => {
@@ -115,7 +142,7 @@ await test('Late created model session is destroyed after cancellation', async (
 await test('Late translation cannot overwrite a new idle turn', async () => {
   const p = page(); let resolvePrompt; responseOverride = () => new Promise(resolve => {resolvePrompt = resolve;});
   action(p); const r = recognitions.at(-1); r.result('안녕하세요'); r.onend(); await flush();
-  p.cancel(); resolvePrompt('Late response'); await flush(); assert.equal(p.data.english, ''); p.onUnload();
+  p.cancel(); resolvePrompt('Late response'); await flush(); assert.equal(p.data.translation, ''); p.onUnload();
 });
 await test('Recording and finalization timeouts release microphone', () => {
   const p = page(); action(p); const r = recognitions.at(-1);
@@ -124,6 +151,39 @@ await test('Recording and finalization timeouts release microphone', () => {
   const finalTimer = [...timers.values()].find(t => t.ms === 7000); finalTimer.fn();
   assert.equal(p.data.phase, 'error'); assert.equal(r.aborts, 1); p.onUnload(); timers.clear();
 });
+
+await test('Korean menu selects exactly three targets without starting speech or a model', () => {
+  const p=page(null), before=recognitions.length, models=sessions.length;
+  assert.equal(p.data.menuStep,'target'); assert.equal(p.data.sourceCode,'ko');
+  p.chooseLanguage('ko'); assert.equal(p.data.modeChosen,false);
+  for(const expected of ['zh','fr','en']) {key(p,'ArrowDown');assert.equal(p.data.selectedCode,expected);}
+  key(p,'ArrowUp'); assert.equal(p.data.selectedCode,'fr'); action(p);
+  assert.equal(p.data.menuStep,'pronunciation'); assert.equal(p.data.modeChosen,false);
+  key(p,'ArrowDown'); action(p); assert.equal(p.data.showPronunciation,false); assert.equal(p.data.modeChosen,true);
+  assert.equal(recognitions.length,before); assert.equal(sessions.length,models); p.onUnload();
+});
+await test('All targets request Korean recognition and only the selected translation format', async () => {
+  for(const [target,reading,output] of [['en',false,'Hello.'],['zh',false,'你好。'],['fr',false,'Bonjour.'],['fr',true,'Bonjour.']]) {
+    const p=page(target,reading);
+    responseOverride=()=>JSON.stringify(reading?{translation:output,pronunciation:'봉주르.'}:{translation:output});
+    action(p);const r=recognitions.at(-1);assert.equal(r.lang,'ko-KR');r.result('안녕하세요.');r.onend();await flush();
+    assert.equal(p.data.phase,'done');assert.equal(p.data.translation,output);assert.equal(p.data.pronunciation,reading?'봉주르.':'');
+    const prompt=sessions.at(-1).options.initialPrompts[0].content;
+    assert.equal(prompt,translationPrompt('ko',target,reading));
+    if(!reading) assert.match(prompt,/Do not generate any pronunciation/);
+    p.onUnload();
+  }
+});
+await test('Translation contracts reject unsupported input, malformed JSON and unwanted reading', () => {
+  assert.throws(()=>translationPrompt('en','fr'));assert.throws(()=>translationPrompt('ko','ko'));
+  assert.throws(()=>translationPrompt('ko','en',true));
+  assert.match(translationPrompt('ko','zh'),/Simplified Chinese/);
+  assert.deepEqual(parseTranslation('{"translation":"你好。"}'),{translation:'你好。',pronunciation:''});
+  for(const raw of ['Bonjour.','{}','[]','{"translation":""}','{"translation":"Bonjour.","pronunciation":"봉주르."}']) assert.throws(()=>parseTranslation(raw));
+  assert.throws(()=>parseTranslation('{"translation":"Bonjour."}',true));
+  assert.throws(()=>parseTranslation('{"translation":"Bonjour.","pronunciation":"bonjour"}',true));
+});
+
 await test('Page declarations, handlers and configuration resolve', () => {
   const base = new URL('../', import.meta.url);
   const config = JSON.parse(fs.readFileSync(new URL('app.json', base), 'utf8'));

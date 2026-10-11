@@ -22,11 +22,11 @@ globalThis.SpeechRecognition = class {
 };
 globalThis.LanguageModel = {};
 const isFrench = 'french' in pageDefinition.data;
-const result = isFrench ? {french:'Bonjour.', pronunciation:'봉주르.', korean:'안녕하세요.'} : {english:'Hello.', korean:'안녕하세요.'};
+const result = isFrench ? {french:'Bonjour.', pronunciation:'봉주르.', korean:'안녕하세요.'} : {translation:'Hello.', sourceText:'안녕하세요.'};
 function page(choose = true) {
   const p = {...pageDefinition, data: structuredClone(pageDefinition.data), setData(v) { Object.assign(this.data, v); }};
   p.onLoad(); p.onShow();
-  if (isFrench && choose) p.chooseWithPronunciation();
+  if (choose) { if (isFrench) p.chooseWithPronunciation(); else p.pickEnglish(); }
   return p;
 }
 function key(p, code) { p.onKeyUp({code, preventDefault() {}}); }
@@ -66,6 +66,12 @@ test('Idle and error screens also clear, while hide and unload cancel timers', (
   p.setPhase('idle'); const stale = timers.get(p._screenTimer).fn;
   p.onHide(); assert.equal(timers.size, 0); stale(); assert.equal(p.data.screenBlank, false);
   p.onShow(); advance(60000); assert.equal(p.data.screenBlank, true); p.onUnload();
+});
+test('Blank language menu restores first, then accepts a target without capture', () => {
+ const p=page(false), before=starts; advance(60000); key(p,'Enter');
+ assert.equal(p.data.screenBlank,false); assert.equal(p.data.modeChosen,false);
+ advance(500); key(p,'Enter'); assert.equal(p.data.targetCode,'en'); assert.equal(p.data.modeChosen,true);
+ assert.equal(starts,before); p.onUnload();
 });
 if (isFrench) {
   test('Opening asks for a mode; swipe and confirm choose translation only without recording', () => {

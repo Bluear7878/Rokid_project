@@ -20,6 +20,7 @@ export default {
 
   onLoad() {
     this._turn = 0;
+    this._closing = false;
     this._visible = true;
     this._phase = 'choosing';
     this._recognition = null;
@@ -32,6 +33,7 @@ export default {
   },
 
   onShow() {
+    if (this._closing) return;
     this._visible = true;
     this.setData({ screenBlank: false });
     this.refreshScreenTimer();
@@ -130,6 +132,28 @@ export default {
     this.cancel();
   },
 
+  closeApp(event) {
+    if (this._closing) { if (event) event.preventDefault(); return; }
+    this._closing = true;
+    this.leave();
+    try {
+      if (typeof window !== 'undefined' && typeof window.close === 'function') {
+        window.close();
+        if (event) event.preventDefault();
+        return;
+      }
+      if (typeof this.finish === 'function') {
+        this.finish();
+        if (event) event.preventDefault();
+        return;
+      }
+    } catch (_) {}
+    // Keep the native Back action available if this host cannot close explicitly.
+    this._closing = false;
+    this._visible = true;
+    this.setPhase('error', { error: '앱 종료를 요청하지 못했습니다. 뒤로가기를 다시 눌러 주세요.' });
+  },
+
   fail(turn, message, phase = 'error') {
     if (!this.current(turn)) return;
     this._turn += 1;
@@ -160,11 +184,8 @@ export default {
     if (event.code === 'Enter') {
       event.preventDefault();
       this.onAction();
-    } else if (event.code === 'Backspace') {
-      if (['starting', 'listening', 'finalizing', 'translating'].includes(this._phase)) {
-        event.preventDefault();
-        this.cancel();
-      }
+    } else if (event.code === 'Backspace' || event.code === 'Escape') {
+      this.closeApp(event);
     } else if (event.code === 'ArrowDown' || event.code === 'ArrowUp') {
       event.preventDefault();
       if (!this._visible) return;

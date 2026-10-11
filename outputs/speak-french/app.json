@@ -2,7 +2,7 @@
   "agentName": "Speak French",
   "agentDesc": "Translate button-activated Korean speech into French, with an optional Hangul pronunciation guide. Clear the display after one minute of inactivity.",
   "agentPrompt": "Open the full-screen pages/index/index page when the user asks for Speak French or 프랑스어 통역. First let the user choose French only or French with an approximate Hangul pronunciation guide. The page translates user-triggered Korean speech and shows the recognized Korean text. After one minute of inactivity it clears its display while remaining open. Use the interactive page instead of answering in chat.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "engine": ">=0.18.0",
   "pages": [
     "pages/index/index"

@@ -1,21 +1,38 @@
 <view ink:if="{{screenBlank}}" class="screen" bindtap="onAction"></view>
 <view ink:if="{{!screenBlank}}" class="screen" bindtap="onInteraction">
   <view class="heading">
-    <text class="title">영어 통역</text>
+    <text class="title">통역</text>
     <text class="status">{{status}}</text>
   </view>
-  <scroll-view class="result-area" scroll-y="true" scroll-top="{{scrollTop}}">
+  <view ink:if="{{!modeChosen}}" class="menu">
+    <text class="instruction">{{menuTitle}}</text>
+    <text class="source-label">입력은 한국어입니다.</text>
+    <view ink:if="{{menuStep === 'target'}}" class="menu">
+      <button class="{{selectedCode === 'en' ? 'action selected' : 'action'}}" bindtap="pickEnglish" tabindex="0">{{selectedCode === 'en' ? '선택 · 영어' : '영어'}}</button>
+      <button class="{{selectedCode === 'zh' ? 'action selected' : 'action'}}" bindtap="pickChinese" tabindex="0">{{selectedCode === 'zh' ? '선택 · 중국어 · 간체' : '중국어 · 간체'}}</button>
+      <button class="{{selectedCode === 'fr' ? 'action selected' : 'action'}}" bindtap="pickFrench" tabindex="0">{{selectedCode === 'fr' ? '선택 · 프랑스어' : '프랑스어'}}</button>
+    </view>
+    <view ink:if="{{menuStep === 'pronunciation'}}" class="menu">
+      <button class="{{modeIndex === 0 ? 'action selected' : 'action'}}" bindtap="chooseWithPronunciation" tabindex="0">{{modeIndex === 0 ? '선택 · 한글 발음 함께 보기' : '한글 발음 함께 보기'}}</button>
+      <button class="{{modeIndex === 1 ? 'action selected' : 'action'}}" bindtap="chooseTranslationOnly" tabindex="0">{{modeIndex === 1 ? '선택 · 번역만 보기' : '번역만 보기'}}</button>
+    </view>
+    <text class="hint">밀기: 선택 변경 / 탭: 확정 / 뒤로: 앱 종료</text>
+  </view>
+  <text ink:if="{{modeChosen}}" class="source-label">한국어 → {{targetLabel}}</text>
+  <scroll-view ink:if="{{modeChosen}}" class="result-area" scroll-y="true" scroll-top="{{scrollTop}}">
     <view class="content">
-      <text ink:if="{{english}}" class="english">{{english}}</text>
-      <text ink:if="{{korean}}" class="source-label">인식한 한국어</text>
-      <text ink:if="{{korean}}" class="korean">{{korean}}</text>
+      <text ink:if="{{translation}}" class="translation">{{translation}}</text>
+      <text ink:if="{{showPronunciation && pronunciation}}" class="source-label">한글 발음 (근사 표기)</text>
+      <text ink:if="{{showPronunciation && pronunciation}}" class="pronunciation">{{pronunciation}}</text>
+      <text ink:if="{{sourceText}}" class="source-label">인식한 한국어</text>
+      <text ink:if="{{sourceText}}" class="korean">{{sourceText}}</text>
       <text ink:if="{{error}}" class="error">{{error}}</text>
       <text ink:if="{{phase === 'idle'}}" class="instruction">버튼을 누르고 한국어로 말하세요.</text>
       <text ink:if="{{phase === 'listening'}}" class="instruction">다시 누르면 입력을 마칩니다.</text>
     </view>
   </scroll-view>
-  <view class="controls">
+  <view ink:if="{{modeChosen}}" class="controls">
     <button class="action" bindtap="onAction" tabindex="0">{{actionLabel}}</button>
-    <text class="hint">탭: 시작·종료 / 밀기: 스크롤 / 뒤로: 취소·닫기</text>
+    <text class="hint">탭: 시작·마치기 / 밀기: 스크롤 / 뒤로: 앱 종료</text>
   </view>
 </view>
