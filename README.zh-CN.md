@@ -49,3 +49,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File $s pack                     
 ## 注意
 
 各应用目录中的 `AGENTS.md` 定义了 Agent 在眼镜上的行为，会被打包进 AIX 包。它不是给编码 agent 的指令文件。给编码 agent 的指令是仓库根目录下的 `AGENTS.md`。
+
+## 许可证
+
+Apache License 2.0，详见 [LICENSE](LICENSE)。

@@ -49,3 +49,7 @@ Rokid 개발 케이블이 있으면 `rokid-dev.ps1 install-launch`로 Studio를 
 ## 주의
 
 각 앱 폴더의 `AGENTS.md`는 안경에서 도는 Agent의 동작 정의이며 AIX 패키지에 들어갑니다. 코딩 agent에게 주는 지시 파일이 아닙니다. 코딩 agent용 지시는 저장소 루트의 `AGENTS.md`입니다.
+
+## 라이선스
+
+Apache License 2.0입니다. [LICENSE](LICENSE)를 참고하세요.

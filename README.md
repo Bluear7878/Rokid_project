@@ -49,3 +49,7 @@ With a Rokid development cable, `rokid-dev.ps1 install-launch` installs over ADB
 ## Note
 
 The `AGENTS.md` inside each app folder defines how the Agent behaves on the glasses, and it ships inside the AIX package. It is not an instruction file for coding agents. The `AGENTS.md` at the repository root is the one for coding agents.
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE).
