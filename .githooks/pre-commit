@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# pre-commit - check what is about to be committed. See privacy-scan.sh.
+exec "$(dirname "$0")/privacy-scan.sh" --staged

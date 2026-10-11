@@ -1,0 +1,3 @@
+# Exact paths that may be committed although privacy-scan.sh blocks their file type.
+# One path per line, relative to the repository root. Look at the file before adding it:
+# an image or a recording can show an account, a face, a voice or a device.

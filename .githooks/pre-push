@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# pre-push - check every commit and tag that is about to leave this machine, including
+# commits made with `git commit --no-verify` or before the hooks were enabled.
+# See privacy-scan.sh.
+set -u
+scan="$(dirname "$0")/privacy-scan.sh"
+remote="$1"
+zero='^0+$'
+status=0
+tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  printf '%s' "$local_sha" | grep -q -E "$zero" && continue # a deleted ref sends nothing
+  if printf '%s' "$remote_sha" | grep -q -E "$zero"; then
+    # New on the remote: everything the remote does not have yet.
+    revs="$(git rev-list "$local_sha" --not --remotes="$remote")"
+  else
+    revs="$(git rev-list "$remote_sha..$local_sha")"
+  fi
+  for rev in $revs; do
+    "$scan" --commit "$rev" || status=1
+  done
+  if [ "$(git cat-file -t "$local_sha")" = tag ]; then
+    # An annotated tag carries its own tagger identity and message.
+    git cat-file -p "$local_sha" | sed -n -e '/^tagger /p' -e '1,/^$/!p' > "$tmp"
+    "$scan" --message "$tmp" || status=1
+  fi
+done
+
+exit "$status"

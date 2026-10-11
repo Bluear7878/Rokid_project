@@ -52,6 +52,16 @@ powershell -NoProfile -ExecutionPolicy Bypass -File $s pack                     
 
 各应用目录中的 `AGENTS.md` 定义了 Agent 在眼镜上的行为，会被打包进 AIX 包。它不是给编码 agent 的指令文件。给编码 agent 的指令是仓库根目录下的 `AGENTS.md`。
 
+## 隐私保护钩子
+
+本仓库是公开的，因此 git 钩子会拒绝包含个人、设备或账号信息的提交和推送：姓名和邮箱地址、设备序列号、各类 ID 和令牌、本地用户路径、IP 和 MAC 地址、图片、录音和日志。每次克隆后启用一次：
+
+```
+git config core.hooksPath .githooks
+```
+
+钩子还需要一份记录你本人标识信息的私有列表。该列表只保存在 `.git` 目录内，不会被推送。列表、规则以及如何登记例外，见 `.githooks/privacy-scan.sh`。
+
 ## 许可证
 
 Apache License 2.0，详见 [LICENSE](LICENSE)。

@@ -52,6 +52,16 @@ Rokid 개발 케이블이 있으면 `rokid-dev.ps1 install-launch`로 Studio를 
 
 각 앱 폴더의 `AGENTS.md`는 안경에서 도는 Agent의 동작 정의이며 AIX 패키지에 들어갑니다. 코딩 agent에게 주는 지시 파일이 아닙니다. 코딩 agent용 지시는 저장소 루트의 `AGENTS.md`입니다.
 
+## 개인정보 보호 훅
+
+공개 저장소이므로, 개인·기기·계정 정보가 들어간 커밋과 푸시를 git 훅이 막습니다. 이름과 메일 주소, 기기 일련번호, ID와 토큰, 로컬 사용자 경로, IP·MAC 주소, 이미지, 녹음, 로그가 대상입니다. 저장소를 받을 때마다 한 번 켭니다.
+
+```
+git config core.hooksPath .githooks
+```
+
+훅에는 본인 식별값을 적은 비공개 목록도 필요합니다. 이 목록은 `.git` 안에만 있고 푸시되지 않습니다. 목록, 규칙, 예외를 기록하는 방법은 `.githooks/privacy-scan.sh`에 적혀 있습니다.
+
 ## 라이선스
 
 Apache License 2.0입니다. [LICENSE](LICENSE)를 참고하세요.

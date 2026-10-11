@@ -52,6 +52,16 @@ With a Rokid development cable, `rokid-dev.ps1 install-launch` installs over ADB
 
 The `AGENTS.md` inside each app folder defines how the Agent behaves on the glasses, and it ships inside the AIX package. It is not an instruction file for coding agents. The `AGENTS.md` at the repository root is the one for coding agents.
 
+## Privacy guard
+
+This repository is public, so its git hooks refuse commits and pushes that contain personal, device or account information: names and e-mail addresses, device serials, ids and tokens, local user paths, IP and MAC addresses, images, recordings and logs. Enable them once in every clone:
+
+```
+git config core.hooksPath .githooks
+```
+
+The hooks also need a private list of your own identifiers, which stays inside `.git` and is never pushed. `.githooks/privacy-scan.sh` describes that list, the rules and how to record an exception.
+
 ## License
 
 Apache License 2.0. See [LICENSE](LICENSE).

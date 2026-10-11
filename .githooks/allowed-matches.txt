@@ -1,0 +1,16 @@
+# Matched text that privacy-scan.sh accepts. One extended regular expression per line,
+# tested against the matched text only. Add an entry only for content that identifies
+# no person, device or account, and say why.
+
+# Loopback and wildcard addresses.
+^(127\.0\.0\.1|0\.0\.0\.0)$
+
+# Site id inside the public URL of Rokid's bare-metal development documentation.
+^ff28c865a9634876be98cbc293588460$
+
+# A JDK version number (Eclipse Temurin 21.0.12.1) that has the shape of an IP address.
+^21\.0\.12\.1$
+
+# Attribution address of the coding assistant, and GitHub's own noreply domain.
+^noreply@anthropic\.com$
+@users\.noreply\.github\.com$
