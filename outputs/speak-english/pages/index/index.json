@@ -1,4 +1,4 @@
 {
-  "navigationBarTitleText": "Speak Translate",
-  "description": "한국어 입력을 영어·중국어·프랑스어로 번역합니다. 한국어 메뉴에서 버튼으로 언어를 선택합니다."
+  "navigationBarTitleText": "My Translate",
+  "description": "Open the custom My Translate app when explicitly named (open my translate / 마이 트랜슬레이트). Korean button menus select English, Simplified Chinese or French."
 }

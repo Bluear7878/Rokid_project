@@ -1,7 +1,7 @@
 <view ink:if="{{screenBlank}}" class="screen" bindtap="onAction"></view>
 <view ink:if="{{!screenBlank}}" class="screen" bindtap="onInteraction">
   <view class="heading">
-    <text class="title">통역</text>
+    <text class="title">My Translate</text>
     <text class="status">{{status}}</text>
   </view>
   <view ink:if="{{!modeChosen}}" class="menu">
@@ -22,6 +22,7 @@
   <scroll-view ink:if="{{modeChosen}}" class="result-area" scroll-y="true" scroll-top="{{scrollTop}}">
     <view class="content">
       <text ink:if="{{translation}}" class="translation">{{translation}}</text>
+      <text ink:if="{{phase === 'translating' && translation}}" class="source-label">번역을 받는 중입니다.</text>
       <text ink:if="{{showPronunciation && pronunciation}}" class="source-label">한글 발음 (근사 표기)</text>
       <text ink:if="{{showPronunciation && pronunciation}}" class="pronunciation">{{pronunciation}}</text>
       <text ink:if="{{sourceText}}" class="source-label">인식한 한국어</text>

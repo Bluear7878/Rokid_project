@@ -1,6 +1,8 @@
-통역 / Speak Translate — 버전 0.2.0
+My Translate — 버전 0.3.0
 
-기존 Speak English를 통합 번역 앱으로 업데이트했습니다.
+기존 통합 앱 Speak Translate의 이름을 My Translate로 바꿨습니다.
+호출은 "Hi Rokid, open my translate"입니다. 일반적인 "통역" 호출은 앱 실행 정의에서 제외했습니다.
+실제 호출 분기는 Rokid 호스트가 결정하므로 안경에서 확인해야 합니다.
 폴더 outputs/speak-english, VS Code 작업공간과 기본 개발 명령은 그대로 사용합니다.
 기존 Speak French는 호환용으로 남아 있지만 새 통합 앱에서 프랑스어도 선택할 수 있습니다.
 
@@ -9,6 +11,14 @@
 2. 프랑스어는 한글 근사 발음을 함께 볼지 선택합니다. 번역만 선택하면 발음 생성도 요청하지 않습니다.
 3. 버튼을 누르고 한국어로 말합니다. 다시 누르거나 문장이 확정되면 번역합니다.
 입력은 ko-KR 고정입니다. 언어 자동 감지나 음성으로 메뉴를 제어하는 단계가 없습니다.
+
+응답 지연 개선
+- 녹음 버튼을 누르면 마이크를 먼저 시작하고 번역 세션 준비를 함께 진행합니다.
+- 음성 인식이 확정되고 종료된 뒤에만 텍스트를 번역에 보냅니다.
+- 번역문은 스트리밍으로 도착하는 대로 표시합니다. 수신 중 안내가 끝나야 완성된 결과입니다.
+- 프랑스어는 번역문부터 표시하고, 한글 발음은 응답 전체 검증 후 표시합니다.
+- 스트리밍 API가 없는 구형 호스트에서는 한 번의 일반 요청으로 결과를 표시합니다.
+- 취소·뒤로가기·오류·시간 초과 시 준비 세션, 스트림과 대기 타이머를 정리합니다.
 
 조작
 - 위/아래 밀기: 메뉴 선택 변경 또는 긴 결과 스크롤
@@ -24,12 +34,12 @@
 - outputs/development-setup.txt의 설치·사용 안내를 참고하세요.
 - powershell -NoProfile -ExecutionPolicy Bypass -File outputs/scripts/rokid-dev.ps1 check
 - 같은 명령의 check를 preview 또는 pack으로 바꾸어 미리보기/패키징합니다.
-- AIUI Studio 기존 Speak English Agent에 소스와 이름 Speak Translate를 반영하고 AIX Packaging 후 Save Details합니다.
+- AIUI Studio 기존 통합 Agent에 소스와 이름 My Translate를 반영하고 AIX Packaging 후 Save Details합니다.
 - 휴대폰 Hi Rokid > Settings > Developer Options > AIUI > Update glasses resource 실행 후 다운로드 완료를 확인합니다.
-- 안경에서 Speak Translate를 엽니다. 개인 테스트에는 Submit for Review나 개발 케이블이 필요하지 않습니다.
+- 안경에서 "Hi Rokid, open my translate"로 엽니다. 개인 테스트에는 Submit for Review나 개발 케이블이 필요하지 않습니다.
 
 검증 범위
-- 제어 로직 19개 + 타이머 5개 모의 검사, 구문·JSON·AIX 패키징 사전 검사를 통과했습니다.
+- 제어 로직 19개 + 타이머 5개 + 준비·스트리밍 13개 모의 검사, 구문·JSON·AIX 패키징 사전 검사를 통과했습니다.
 - 실제 안경의 뒤로가기, 한국어 인식, 번역 품질과 속도는 아직 검증하지 못했습니다.
 - 로컬 미리보기에는 음성 호스트 기능이 연결되어 있지 않아 실제 음성 인식은 실패할 수 있습니다.
 - 속도 개선 수치는 측정하지 않았습니다. 발음을 끄면 생성할 내용이 줄어들지만 서비스 응답 시간은 별도입니다.
@@ -39,4 +49,5 @@
 
 공식 문서
 https://js.rokid.com/AIUI/api/ai-speech-recognition?lang=en-US&version=latest
+https://js.rokid.com/AIUI/api/ai-language-model?lang=en-US&version=latest
 https://js.rokid.com/AIUI/api/window?lang=en-US&version=latest

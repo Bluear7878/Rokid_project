@@ -1,8 +1,8 @@
 {
-  "agentName": "Speak Translate",
-  "agentDesc": "Button-activated Korean speech translation into English, Simplified Chinese or French, with optional Hangul reading for French.",
-  "agentPrompt": "When asked to open Speak Translate or 통역, open the full-screen pages/index/index page. All controls and instructions are Korean. Speech input is fixed to Korean (ko-KR); never detect or ask for an input language. The user selects the target language using buttons, then starts speech with a button. French output offers optional approximate Hangul reading. Use the interactive page, not a chat answer. Back closes the app; one minute of inactivity only clears the display.",
-  "version": "0.2.0",
+  "agentName": "My Translate",
+  "agentDesc": "My Translate: a custom button-activated Korean translator for English, Simplified Chinese and French. Say open my translate to launch.",
+  "agentPrompt": "Launch this custom app when the user explicitly asks open my translate, My Translate, or 마이 트랜슬레이트. Open the full-screen pages/index/index page. Do not claim generic translate or translation requests intended for the built-in translator. All controls are Korean and input is fixed to ko-KR. The user selects the target language with buttons and starts each recording explicitly. Prepare a translation session during recording, then show streamed translation from the final recognized text. French offers optional approximate Hangul reading. Use the page, not a chat answer. Back closes this app; one minute of inactivity only clears its display.",
+  "version": "0.3.0",
   "engine": ">=0.18.0",
   "pages": [
     "pages/index/index"
@@ -11,6 +11,6 @@
     "RECORD_AUDIO"
   ],
   "window": {
-    "navigationBarTitleText": "Speak Translate"
+    "navigationBarTitleText": "My Translate"
   }
 }
