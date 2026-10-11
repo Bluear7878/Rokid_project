@@ -1,0 +1,16 @@
+{
+  "agentName": "영어 통역",
+  "agentDesc": "버튼을 누르고 한국어로 말하면 영어 자막으로 번역합니다.",
+  "agentPrompt": "영어 통역 또는 Speak English를 열어 달라는 요청에 pages/index/index 전체 화면 페이지를 엽니다. 사용자가 버튼을 누른 뒤 말한 한국어를 영어로 번역합니다. 대화로 대신 답변하지 말고 페이지를 사용합니다.",
+  "version": "0.1.1",
+  "engine": ">=0.18.0",
+  "pages": [
+    "pages/index/index"
+  ],
+  "permissions": [
+    "RECORD_AUDIO"
+  ],
+  "window": {
+    "navigationBarTitleText": "영어 통역"
+  }
+}

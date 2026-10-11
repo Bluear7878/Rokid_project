@@ -1,0 +1,350 @@
+Rokid Glasses 개발 환경 안내 — 2026-10-11 작성
+작업 루트: 이 저장소의 루트 폴더 (아래 경로는 모두 루트 기준입니다)
+
+==========================================================================
+1. 한눈에 보기
+==========================================================================
+지금 되는 것 (케이블 없이)
+  - VS Code에서 소스 편집, 소스 검사, 로컬 화면 미리보기, AIX 패키징
+  - Android 독립 앱 빌드 (공식 샘플 debug APK 빌드 확인)
+
+아직 안 된 것
+  - 안경 ADB 연결: PC가 안경을 USB 장치로 인식하지 못함 (adb devices -l 결과 0대)
+  - 실제 한국어 음성 인식·영어 번역: 한 번도 성공 검증하지 못함
+
+다음에 필요한 것
+  - 전용 개발 케이블, 또는 케이블 없이 Hi Rokid 앱으로 안경에 올려 보는 테스트 (6장)
+  - 음성 백엔드를 따로 붙일지에 대한 결정 (6장 나)
+
+==========================================================================
+2. 대상 기기 구분
+==========================================================================
+이 환경은 "디스플레이가 있는 Rokid Glasses" 기준입니다.
+  - 시스템: YodaOS-Sprite, Android 12 (API 31) / Android Go
+  - 화면: 480 x 640, 단색(녹색)
+  - 적용 문서: AIUI 문서, Bare-Metal Development 문서
+
+적용하지 않은 문서
+  - Rokid Air / Max / AR Lite / AR Studio 등 DP 입력형 AR 안경: UXR SDK·AXR SDK 계열.
+    https://developerdoc.rokid.com/sdk 페이지는 이 계열(UXR/AXR SDK, DP 출력 필요)을 설명합니다.
+  - 기업용 Glass3 계열 문서
+  - CXR-M (휴대폰 쪽 SDK, Rokid 전용 Maven 저장소 필요): 이용 조건을 확인하지 못했으므로
+    사용하지 않았습니다. 공식 샘플도 CXR 의존성 없이 표준 Android 저장소만 씁니다.
+
+내 안경의 모델·펌웨어는 아직 확인하지 못했습니다. 확인 방법:
+  - 휴대폰 Rokid AI(Hi Rokid) 앱 > 기기 탭 > 오른쪽 위 설정(톱니바퀴)
+    안경 이름, 일련번호, 안경 시스템 버전(YODAOS-SPRITE 표기)이 보입니다.
+  - ADB 연결 후에는 설치 작업이 제조사·모델·Android 버전을 먼저 출력합니다.
+
+==========================================================================
+3. 설치된 도구
+==========================================================================
+확인 명령:  outputs\scripts\rokid-dev.ps1 versions   (VS Code 작업 "도구: 버전 확인")
+
+기존 것을 그대로 재사용
+  VS Code      1.140.0    %LOCALAPPDATA%\Programs\Microsoft VS Code
+  Node.js      v24.21.0   work\local-tools\node-v24.21.0-win-x64   (npm 11.19.0)
+  AIX CLI      0.10.1     work\aix-tools\node_modules\@yodaos-pkg\aix-cli   (npm 최신과 동일)
+               미리보기 런타임 Ink 0.18.0
+  ADB          37.0.1     winget 설치본(Google.PlatformTools). PATH에 이미 있음. 재설치하지 않음.
+
+이번에 새로 설치 (모두 work 폴더 안, 공식 배포처, 체크섬 확인)
+  JDK          Eclipse Temurin 21.0.12.1+1   work\android\jdk-21.0.12.1_1
+  Android SDK  work\android\sdk
+                 cmdline-tools 23.0, platforms;android-36.1, build-tools;36.0.0,
+                 platform-tools 37.0.1 (빌드 중 Android Gradle Plugin이 자동 추가)
+  Gradle       9.4.1 (샘플의 gradlew가 내려받음)   캐시: work\android\gradle (약 1GB)
+  공식 샘플    GlassesBareDevSample               work\android-samples\GlassesBareDevSample
+  내려받은 원본 work\downloads (약 340MB, 지워도 됩니다)
+
+전역 설정은 바꾸지 않았습니다
+  - Windows PATH, JAVA_HOME, ANDROID_HOME, GRADLE_USER_HOME 모두 그대로(비어 있음)입니다.
+  - 스크립트가 실행되는 동안에만 해당 프로세스에 환경 변수를 넣습니다.
+
+work 밖에 생긴 것 (%USERPROFILE%\.android)
+  - debug.keystore: Android 빌드가 만드는 표준 디버그 서명 키. 지우지 마세요
+    (지우면 새 키가 생겨 이미 설치한 디버그 앱 위에 덮어 설치가 안 됩니다).
+  - bin, cli, cache (약 235MB): Android SDK 명령줄 도구가 스스로 만든 캐시.
+    지워도 되며, SDK 패키지를 다시 추가할 때 재생성됩니다.
+  - analytics.settings: 사용 통계 수집은 꺼진 상태(hasOptedIn=false)입니다.
+  - Android SDK 라이선스는 SDK 설치 과정에서 비대화식으로 수락 처리되었습니다.
+
+Android Studio는 설치하지 않았습니다 (5장 참고).
+
+==========================================================================
+4. VS Code에서 쓰는 법
+==========================================================================
+여는 법
+  outputs\Speak-English.code-workspace 를 VS Code로 엽니다.
+  (탐색기에서 더블클릭, 또는 VS Code > 파일 > 파일에서 작업 영역 열기)
+  폴더가 두 개 보입니다: speak-english(앱 소스), dev-scripts(개발 스크립트).
+
+작업 실행: 터미널 > 작업 실행 (Ctrl+Shift+P > "Tasks: Run Task")
+
+  케이블 없이 가능
+    AIUI: 소스 검사            구문 / JSON·페이지 구성 / 모의 API 제어 로직 / 패키징 가능 여부
+    AIUI: 제어 로직 검사       모의 API 검사만
+    AIUI: 화면 미리보기        이미 실행 중이면 그 주소를 열고, 아니면 서버 시작 (중복 실행 안 함)
+    AIUI: AIX 패키지 만들기    outputs\speak-english.aix 생성 (Ctrl+Shift+B)
+    Android: 샘플 debug APK 빌드
+    도구: 버전 확인
+
+  안경 연결 후 가능
+    기기: 연결 확인 (adb devices -l)
+    기기: AIUI 상태 보기 (aix device)
+    기기: AIX 설치 후 페이지 실행
+    기기: 페이지만 실행
+    기기: 로그 보기 (logcat)
+    Android: 샘플 APK 설치
+    Android: 샘플 앱 실행
+
+터미널에서 직접 실행 (PowerShell, 저장소 루트에서)
+  $s = 'outputs\scripts\rokid-dev.ps1'
+  powershell -NoProfile -ExecutionPolicy Bypass -File $s help
+  powershell -NoProfile -ExecutionPolicy Bypass -File $s check
+  powershell -NoProfile -ExecutionPolicy Bypass -File $s preview -Open
+  powershell -NoProfile -ExecutionPolicy Bypass -File $s pack
+  다른 앱 폴더는 -Project 로 지정합니다.  예: ... -File $s check -Project speak-french
+
+.wxml / .wxss 파일은 HTML / CSS 문법 강조로 열리도록 작업공간에 설정했습니다.
+
+==========================================================================
+5. 안경 연결 (ADB)
+==========================================================================
+현재 상태 (2026-10-11)
+  - adb devices -l : 연결된 기기 없음
+  - Windows 장치 관리자에도 Rokid/ADB 장치가 없음 (마우스·웹캠 등만 보임)
+  - 즉 드라이버나 승인 문제 이전에, 안경이 USB 데이터 장치로 잡히지 않는 단계입니다.
+    동봉 충전 케이블로 데이터 연결이 되는지는 확인되지 않았습니다.
+
+공식 문서의 요구 사항 (Bare-Metal Development Quick Start)
+  - 소매 패키지에는 충전 케이블만 들어 있는 경우가 많고, 디버깅에는 전용 개발 케이블이 필요합니다.
+  - 개발 케이블은 Rokid 개발자 포럼(https://forum.rokid.com) 또는 공식 개발자 지원을 통해 받습니다.
+  - 휴대폰 Rokid AI 앱에서 안경 ADB를 켜야 합니다.
+
+연결 순서
+  1) 개발 케이블로 안경을 PC USB 포트에 직접 연결합니다.
+  2) 휴대폰 Rokid AI(Hi Rokid) 앱 > 기기 탭 > 설정(톱니바퀴) > 개발자(Developer)
+     > "안경 ADB 디버깅" 스위치를 켜고 경고창에서 확인합니다.
+     (공식 스크린샷은 중국어판 기준: 设置 > 开发者 > 眼镜ADB调试 > 确认开启.
+      글로벌판 Hi Rokid의 정확한 메뉴 이름은 직접 확인하지 못했습니다.)
+  3) VS Code 작업 "기기: 연결 확인" 을 실행합니다.
+
+상태별 조치
+  device        정상. 설치·실행 가능.
+  unauthorized  이 PC의 디버깅 키가 승인되지 않은 상태입니다. 사용자가 직접 해야 할 일:
+                - 앱의 "안경 ADB 디버깅"이 켜져 있는지 확인
+                - 안경 화면이나 휴대폰 앱에 USB 디버깅 허용 요청이 뜨면 허용
+                - 요청이 안 보이면 케이블을 뽑았다 다시 꽂고 다시 확인
+  offline       케이블을 다시 꽂고 안경을 깨운 뒤 다시 확인
+  목록에 없음   케이블(데이터 지원 여부), USB 포트, 앱의 ADB 스위치 순으로 확인
+
+기기가 여러 대일 때
+  스크립트는 대상을 자동으로 고르지 않고 목록을 보여 준 뒤 멈춥니다. 다음 중 하나로 지정합니다.
+  - 명령에 -Serial <serial> 추가
+  - work\device-serial.txt 첫 줄에 serial 적기 (VS Code 작업은 이 파일을 사용)
+  - 환경 변수 ANDROID_SERIAL
+  설치 전에 기기의 제조사·모델·Android 버전을 출력하며, Rokid도 아니고 Android 12(API 31)도
+  아니면 설치를 멈춥니다. 대상이 맞다면 -Force 로 계속할 수 있습니다.
+
+연결 후 명령
+  ... -File $s devices            연결 상태
+  ... -File $s device-info        aix device (개발자 모드, 설치된 Agent 보기. 읽기 전용)
+  ... -File $s install-launch     aix show > aix install > aix launch-page pages/index/index
+  ... -File $s launch             페이지만 다시 열기
+  ... -File $s logs               logcat (앱·AIUI 관련 줄만)
+  ... -File $s logs -All          logcat 전체
+  ... -File $s logs -Pattern "Speak English|chromium" -Save    필터 지정, work\logs 에 저장
+
+  스크립트 없이 공식 명령 그대로 (work 폴더의 node, cli.js 경로 사용)
+    adb devices -l
+    node cli.js device
+    node cli.js show    <앱 폴더>
+    node cli.js install <앱 폴더> --serial <serial>
+    node cli.js launch-page <앱 폴더> pages/index/index --serial <serial>
+
+알아둘 점
+  - aix launch-page 의 성공 메시지는 "실행 요청이 수락됨"일 뿐입니다. 화면과 음성 동작은
+    안경에서 직접 확인해야 합니다 (공식 문서 명시).
+  - 설치가 런타임 버전 불일치로 실패하면 app.json 의 engine(현재 >=0.18.0)을 조정합니다.
+  - aix show / install / launch-page 를 폴더에 처음 실행하면 앱 폴더에 .aix\agent-id 가 생깁니다.
+    이것은 로컬 개발 설치용 ID(develop.rokid.agent.<uuid>)로, Studio Agent ID와 별개입니다.
+    지우면 안경에 새 Agent로 중복 설치될 수 있으니 유지하세요. AIX 패키지에는 포함되지 않습니다.
+  - 로그 필터 기본값은 추정입니다. 실제 기기 로그를 본 뒤 -Pattern 으로 조정해야 합니다.
+  - 기기 로그에는 다른 앱의 정보가 섞일 수 있습니다. -Save 로 저장한 파일은 공유 전에 확인하세요.
+
+하지 않는 것
+  초기화, 루팅, 펌웨어 교체, 무선 ADB(adb tcpip) 활성화는 스크립트에 없고 실행하지도 않았습니다.
+  aix device set-dev(개발자 모드 켜기)도 실행하지 않습니다. Widget 디버깅 때만 필요합니다.
+
+==========================================================================
+6. 검증 결과 — 세 가지를 구분합니다
+==========================================================================
+가. 화면 확인 (로컬 미리보기, Ink 0.18.0, 헤드리스 Edge로 실제 렌더링)
+  - 대기 화면: 제목 "영어 통역", 상태 "준비", 안내문, "말하기 시작" 버튼 표시 확인
+  - 버튼(Enter) 입력 후: 상태 "음성 서비스 미연결", 안내문, "연결 다시 확인" 버튼 표시 확인
+  - 캡처: work\verification\preview-1-idle.png, preview-2-voice-service-unavailable.png
+  - 미리보기 뷰포트는 480x352 입니다. 실제 안경 화면(480x640)·밝기·글자 가독성은 미확인.
+
+나. 모의 API 검사 (실제 서비스 호출 없음)
+  - JavaScript 구문 4개 파일, JSON 3개 파일, 페이지 구성 통과
+  - tests\controller.test.mjs 13개, tests\screen-timeout.test.mjs 4개 통과
+  - AIX 패키징 통과 (공식 CLI 0.10.1)
+  - 이 검사는 가짜 음성·번역 객체를 사용합니다. 번역 결과 문장은 테스트용 고정 값이며
+    번역 품질이나 실제 인식과는 무관합니다.
+
+다. 실제 음성 서비스 — 검증하지 못함
+  - 로컬 미리보기에서 재현한 실제 오류:
+      network / Host capability speech.getRecognitionCapabilities is not configured on Web host
+    콘솔 로그: [Speak English] speech error: network unconfigured-web-host
+  - 가짜 마이크 장치를 허용한 상태에서도 같은 오류였습니다. 즉 마이크 권한 문제가 아니라
+    CLI 미리보기 페이지가 음성 호스트 기능을 연결하지 않고 런타임을 띄우기 때문입니다.
+  - 한국어(ko-KR) 인식 가능 여부, 영어 번역 결과, 안경 마이크, 안경 버튼 매핑은 모두 미검증입니다.
+  - Node.js·JDK·SDK 설치는 이 문제를 해결하지 않습니다.
+
+Android 샘플
+  - :app:assembleDebug BUILD SUCCESSFUL (첫 빌드 약 10분, 의존성 다운로드 포함)
+  - app-debug.apk: com.rokid.glassesbaredevsample, minSdk 31, targetSdk 36, 디버그 서명 확인
+  - 안경에 설치·실행은 하지 못함 (기기 미연결)
+
+==========================================================================
+7. 실제 음성 테스트 경로
+==========================================================================
+가. Rokid / Hi Rokid 가 제공하는 서비스 (기존 승인 범위 안)
+
+  1) 케이블 없이 안경에서 테스트 — 지금 바로 시도할 수 있는 경로
+     - AIUI Studio(https://aiui-global.rokid.com)에서 Speak English 프로젝트를 최신 로컬 소스로
+       갱신하고 Build & Review > AIX Packaging 실행
+     - 휴대폰 Hi Rokid 앱 > Settings > Developer Options > AIUI > Update glasses resource
+     - 안경에서 앱을 열어 한국어로 말해 봅니다.
+     주의: Studio의 클라우드 패키지는 로컬 소스(현재 0.1.1)와 다를 수 있습니다.
+           이번 작업에서 Studio는 건드리지 않았습니다. 마켓 심사 제출도 하지 않았습니다.
+
+  2) 개발 케이블 + ADB: 5장의 install-launch. Studio를 거치지 않고 로컬 소스를 바로 올립니다.
+
+  3) AIUI Studio / AIUI Editor 의 웹 시뮬레이터: 공식 문서는 웨이크업·음성 인식·LLM·음성 재생
+     흐름을 시뮬레이션한다고 설명합니다. 한국어 인식이 되는지는 확인하지 못했습니다.
+
+  한국어 지원 여부
+     - AIUI 개발 문서에는 SpeechRecognition 지원 언어 목록이 없습니다.
+     - 판매처 제품 설명에는 음성 상호작용 12개 언어에 한국어가 포함되어 있다고 나오지만,
+       이것이 AIUI 앱의 ko-KR 인식을 보장하지는 않습니다.
+     - 앱은 language-not-supported 오류를 별도 문구("한국어(ko-KR)를 지원하지 않습니다")로
+       표시하므로, 안경에서 한 번 실행해 보면 판별됩니다.
+
+나. 별도 음성 인식·번역 백엔드 — 결정이 필요합니다. 아무것도 가입·연결하지 않았습니다.
+
+  방식 1) 앱에서 직접 연결
+     마이크 녹음(getUserMedia + MediaRecorder) > 내 서버(HTTPS/WebSocket) > 음성 인식·번역 제공자
+     - API 키는 서버에만 두고 앱 소스·AIX·로그에는 넣지 않습니다.
+     - 필요한 것: 제공자 계정과 결제 수단, 서버를 올릴 곳, Studio 권한 설명 갱신
+       (음성이 Rokid 외 제3자에게 전송된다는 점 명시)
+     - 안경의 네트워크는 휴대폰 블루투스 링크를 거칠 수 있어 지연을 실기기에서 확인해야 합니다.
+
+  방식 2) PC 미리보기 전용
+     Ink 웹 런타임에는 hostCapabilities 로 음성·LLM 제공자를 꽂는 지점이 있습니다
+     (런타임 코드에서 확인, 공식 문서에는 없음). 자체 미리보기 페이지를 만들면 PC에서 음성
+     흐름을 돌려볼 수 있지만, 안경의 실제 동작을 대변하지 않고 런타임 갱신 시 깨질 수 있습니다.
+
+  후보 제공자 (가격은 2차 출처 기준, 계약 전 공식 가격표 확인 필요)
+     - OpenAI: 음성 인식 약 $0.003~0.006/분 + 번역용 모델 토큰 비용. 음성이 OpenAI로 전송됨.
+     - Google Cloud: Speech-to-Text v2 약 $0.016/분 + Cloud Translation(가격 미확인).
+       음성이 Google Cloud로 전송됨.
+     - 국내 제공자(Naver CLOVA Speech / Papago 등): 가격 미확인.
+     참고 규모: 10초 발화 100회는 약 17분이므로 테스트 비용은 1달러 미만 수준입니다.
+
+  권장 순서
+     먼저 가-1)로 Rokid 서비스의 한국어 인식 여부를 확인하고,
+     미지원으로 확인될 때만 나)를 검토하는 것이 비용·개인정보 면에서 유리합니다.
+
+==========================================================================
+8. Android 독립 앱 개발
+==========================================================================
+공식 요구 사항 (Bare-Metal Development 문서 + 공식 샘플의 빌드 파일에서 확인)
+  안경 OS        YodaOS-Sprite, Android 12 (API 31) / Android Go
+  minSdk 31 / targetSdk 36 / compileSdk 36.1
+  Gradle 9.4.1 / Android Gradle Plugin 9.2.1 / Kotlin 2.2.10 / JDK 21 (소스 호환 Java 11)
+  UI             Jetpack Compose, 480 x 640
+  기능           표준 Android API (AudioRecord 8채널, CameraX, SensorManager, KeyEvent·브로드캐스트)
+  저장소         google, mavenCentral (+ 샘플이 넣어 둔 aliyun google 미러). Rokid 전용 SDK 없음.
+
+빌드
+  VS Code 작업 "Android: 샘플 debug APK 빌드", 또는
+  ... -File $s android-build
+  결과: work\android-samples\GlassesBareDevSample\app\build\outputs\apk\debug\app-debug.apk
+
+안경에 설치·실행 (개발 케이블 연결 후)
+  ... -File $s android-install     adb install -r
+  ... -File $s android-launch      샘플 앱 실행
+  화면 미러링은 공식 문서가 scrcpy를 권합니다 (설치하지 않았습니다).
+
+VS Code·명령줄로 가능한 것
+  - Gradle 빌드, APK 설치·실행, logcat 확인
+  - Kotlin 소스 편집 (Kotlin 확장을 설치하면 문법 강조 수준. 확장은 설치하지 않았습니다.)
+
+Android Studio가 필요한 것 (공식 문서의 권장 IDE)
+  - Compose 미리보기(@Preview), Layout Inspector
+  - 중단점 디버깅, 프로파일러
+  - 정확한 Kotlin·Compose 자동완성과 리팩터링, 새 프로젝트 마법사
+  설치한다면 SDK 위치를 work\android\sdk, Gradle JDK를 work\android\jdk-21.0.12.1_1 로 지정하면
+  이번에 받은 것을 그대로 재사용할 수 있습니다.
+
+AIUI 앱과의 관계
+  speak-english 는 AIUI 앱 그대로이며 Android 앱으로 변환하지 않았습니다.
+  샘플은 별도 폴더에 원본 그대로 있습니다(수정 없음).
+  독립 Android 앱에서는 AIUI의 SpeechRecognition / LanguageModel 을 쓸 수 없으므로,
+  같은 기능을 만들려면 음성 인식·번역 백엔드를 직접 붙여야 합니다 (7장 나).
+
+==========================================================================
+9. 알아둘 점
+==========================================================================
+- AIX_HOME_DIR 은 효과가 없습니다. aix-cli 0.10.1 코드에서 이 이름은 환경 변수가 아니라
+  내부 상수(사용자 홈의 .aix)이며, aix runtime select 를 쓸 때만 runtime.json 을 만듭니다.
+  work\aix-home 폴더는 존재하지 않고 필요하지도 않아 작업 정의에서 뺐습니다.
+
+- 같은 폴더에서 다른 작업이 동시에 진행 중이었습니다 (16:24~16:50).
+  speak-french 앱이 새로 생겼고, speak-english 가 0.1.1(화면 자동 지움, 테스트 파일 추가)로
+  바뀌었으며, outputs\speak-english.aix 도 16:50에 그쪽에서 다시 패키징되었습니다.
+  이번 작업은 speak-english / speak-french 폴더 안의 파일과 Speak-French.code-workspace 를
+  수정하지 않았습니다. 6장의 검사 결과는 0.1.1 소스 기준입니다.
+
+- speak-english\README.txt 의 "VS Code에서 개발" 절은 예전 작업 3개만 설명합니다.
+  작업 이름은 그대로 유지했으므로 틀린 내용은 아니며, 전체 목록은 이 문서 4장을 보세요.
+
+- 미리보기 서버가 두 개 떠 있습니다 (이번 작업이 띄운 것은 없음).
+    speak-english  http://127.0.0.1:50063/
+    speak-french   http://127.0.0.1:50427/
+  끝내려면 해당 터미널에서 Ctrl+C, 또는 "AIUI: 화면 미리보기" 작업이 알려 주는 PID를 종료합니다.
+
+- 프로젝트를 다른 PC나 다른 경로로 옮기면 work 폴더의 도구 경로가 달라지므로 다시 설정해야 합니다.
+
+==========================================================================
+10. 변경·추가된 파일
+==========================================================================
+추가
+  outputs\development-setup.txt                이 문서
+  outputs\scripts\rokid-dev.ps1                개발 스크립트
+  work\android\                                JDK 21, Android SDK, Gradle 캐시, 빌드 로그
+  work\android-samples\GlassesBareDevSample\   공식 샘플 (원본 그대로 + 빌드 산출물)
+  work\downloads\                              내려받은 설치 원본
+  work\verification\                           미리보기 캡처와 기록
+  work\backups\                                바꾸기 전 원본 (작업공간 파일, AIX, README)
+  work\tmp\                                    검사용 임시 패키지
+
+수정
+  outputs\Speak-English.code-workspace         폴더 2개, 작업 13개, wxml/wxss 연결
+                                               원본: work\backups\Speak-English.code-workspace.20261011-161246.bak
+
+정리해도 되는 것
+  work\downloads (약 340MB), work\tmp, work\android\gradle (약 1GB, 다음 빌드 때 다시 받음)
+
+==========================================================================
+11. 공식 자료
+==========================================================================
+AIUI 저장소          https://github.com/yodaos-project/AIUI
+CLI 실기기 디버깅    https://github.com/yodaos-project/AIUI/blob/main/documentation/0-guide/debug/cli_device_debug.en-US.md
+CLI 명령 설명        work\rokid-aiui\documentation\7-tools\cli.en-US.md (로컬 사본)
+Bare-Metal 개발      https://custom.rokid.com/prod/rokid_web/ff28c865a9634876be98cbc293588460/pc/us/index.html
+공식 샘플 zip        https://rokid-ota.oss-cn-hangzhou.aliyuncs.com/toB/Document/CXR_Bare/GlassesBareDevSample.zip
+Rokid 개발자 포럼    https://forum.rokid.com
+AIUI Studio          https://aiui-global.rokid.com

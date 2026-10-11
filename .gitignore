@@ -1,0 +1,9 @@
+# 개발 도구, 캐시, 내려받은 원본, 임시 파일 (outputs/development-setup.txt 3장대로 다시 설치)
+/work/
+
+# 빌드 산출물 (rokid-dev.ps1 pack 으로 다시 만듭니다)
+*.aix
+*-source.zip
+
+# Studio·미리보기 화면 캡처 (계정 화면이 찍혀 있어 공개 저장소에는 올리지 않습니다)
+/outputs/*.jpg

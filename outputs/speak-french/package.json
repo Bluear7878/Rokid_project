@@ -1,0 +1,9 @@
+{
+  "name": "rokid-speak-french",
+  "version": "0.1.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/controller.test.mjs && node tests/screen-timeout.test.mjs"
+  }
+}

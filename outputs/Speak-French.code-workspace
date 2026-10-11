@@ -1,0 +1,36 @@
+{
+  "folders": [{ "path": "speak-french" }],
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "AIUI: 화면 미리보기",
+        "type": "process",
+        "command": "${workspaceFolder}/../../work/local-tools/node-v24.21.0-win-x64/node.exe",
+        "args": ["${workspaceFolder}/../../work/aix-tools/node_modules/@yodaos-pkg/aix-cli/dist/cli.js", "preview", "${workspaceFolder}", "--dev"],
+        "options": {"cwd": "${workspaceFolder}", "env": {"AIX_HOME_DIR": "${workspaceFolder}/../../work/aix-home"}},
+        "problemMatcher": [],
+        "detail": "터미널에 표시되는 주소를 여세요. 기본 로컬 미리보기에는 음성 서비스가 연결되어 있지 않습니다. 종료는 Ctrl+C입니다."
+      },
+      {
+        "label": "AIUI: AIX 패키지 만들기",
+        "type": "process",
+        "command": "${workspaceFolder}/../../work/local-tools/node-v24.21.0-win-x64/node.exe",
+        "args": ["${workspaceFolder}/../../work/aix-tools/node_modules/@yodaos-pkg/aix-cli/dist/cli.js", "pack", "${workspaceFolder}", "-o", "${workspaceFolder}/../speak-french.aix"],
+        "options": {"cwd": "${workspaceFolder}", "env": {"AIX_HOME_DIR": "${workspaceFolder}/../../work/aix-home"}},
+        "group": {"kind": "build", "isDefault": true},
+        "problemMatcher": []
+      },
+      {
+        "label": "AIUI: 제어 로직 검사",
+        "type": "process",
+        "command": "${workspaceFolder}/../../work/local-tools/node-v24.21.0-win-x64/node.exe",
+        "args": ["--test", "${workspaceFolder}/tests/controller.test.mjs", "${workspaceFolder}/tests/screen-timeout.test.mjs"],
+        "options": {"cwd": "${workspaceFolder}"},
+        "group": "test",
+        "problemMatcher": [],
+        "detail": "모의 API로 제어 로직을 검사합니다. 실제 음성 인식·번역 테스트는 아닙니다."
+      }
+    ]
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "folders": [
+    { "name": "speak-english", "path": "speak-english" },
+    { "name": "dev-scripts", "path": "scripts" }
+  ],
+  "settings": {
+    "files.associations": {
+      "*.wxml": "html",
+      "*.wxss": "css"
+    }
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "AIUI: 소스 검사",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder:dev-scripts}/rokid-dev.ps1", "check"],
+        "options": {"cwd": "${workspaceFolder:speak-english}"},
+        "group": {"kind": "test", "isDefault": true},
+        "problemMatcher": [],
+        "detail": "구문, JSON·페이지 구성, 모의 API 제어 로직, 패키징 가능 여부를 검사합니다. 실제 음성 인식·번역 테스트는 아닙니다."
+      },
+      {
+        "label": "AIUI: 제어 로직 검사",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder:dev-scripts}/rokid-dev.ps1", "test"],
+        "options": {"cwd": "${workspaceFolder:speak-english}"},
+        "group": "test",
+        "problemMatcher": [],
+        "detail": "모의 API로 제어 로직을 검사합니다. 실제 음성 인식·번역 테스트는 아닙니다."
+      },
+      {
+        "label": "AIUI: 화면 미리보기",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder:dev-scripts}/rokid-dev.ps1", "preview", "-Open"],
+        "options": {"cwd": "${workspaceFolder:speak-english}"},
+        "presentation": {"panel": "dedicated"},
+        "problemMatcher": [],
+        "detail": "이미 실행 중이면 그 주소를 열고, 아니면 서버를 시작합니다. 로컬 미리보기에는 음성 서비스가 연결되어 있지 않습니다. 종료는 Ctrl+C입니다."
+      },
+      {
+        "label": "AIUI: AIX 패키지 만들기",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder:dev-scripts}/rokid-dev.ps1", "pack"],
+        "options": {"cwd": "${workspaceFolder:speak-english}"},
+        "group": {"kind": "build", "isDefault": true},
+        "problemMatcher": [],
+        "detail": "outputs/speak-english.aix 를 만듭니다. Studio 클라우드 패키지는 Studio에서 따로 갱신해야 합니다."
+      },
+      {
+        "label": "기기: 연결 확인 (adb devices -l)",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder:dev-scripts}/rokid-dev.ps1", "devices"],
+        "problemMatcher": [],
+        "detail": "ADB 연결 상태와 상태별 조치 안내를 보여 줍니다."
+      },
+      {
+        "label": "기기: AIUI 상태 보기 (aix device)",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder:dev-scripts}/rokid-dev.ps1", "device-info"],
+        "problemMatcher": [],
+        "detail": "개발자 모드, Widget 상태, 설치된 Agent를 읽기만 합니다. 개발용 케이블과 ADB 승인이 필요합니다."
+      },
+      {
+        "label": "기기: AIX 설치 후 페이지 실행",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder:dev-scripts}/rokid-dev.ps1", "install-launch"],
+        "options": {"cwd": "${workspaceFolder:speak-english}"},
+        "problemMatcher": [],
+        "detail": "aix show, aix install, aix launch-page 를 차례로 실행합니다. 기기가 여러 대면 work/device-serial.txt 에 serial을 적어 두세요."
+      },
+      {
+        "label": "기기: 페이지만 실행",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder:dev-scripts}/rokid-dev.ps1", "launch"],
+        "options": {"cwd": "${workspaceFolder:speak-english}"},
+        "problemMatcher": [],
+        "detail": "이미 설치된 Agent의 pages/index/index 를 엽니다."
+      },
+      {
+        "label": "기기: 로그 보기 (logcat)",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder:dev-scripts}/rokid-dev.ps1", "logs"],
+        "presentation": {"panel": "dedicated"},
+        "problemMatcher": [],
+        "detail": "앱·AIUI 관련 줄만 걸러 보여 줍니다. 종료는 Ctrl+C입니다. 필터는 실제 기기 로그를 보고 조정해야 합니다."
+      },
+      {
+        "label": "Android: 샘플 debug APK 빌드",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder:dev-scripts}/rokid-dev.ps1", "android-build"],
+        "problemMatcher": [],
+        "detail": "공식 GlassesBareDevSample 을 work 폴더의 JDK 21·Android SDK로 빌드합니다. AIUI 앱과는 별개입니다."
+      },
+      {
+        "label": "Android: 샘플 APK 설치",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder:dev-scripts}/rokid-dev.ps1", "android-install"],
+        "problemMatcher": [],
+        "detail": "adb install -r 로 안경에 설치합니다. 개발용 케이블과 ADB 승인이 필요합니다."
+      },
+      {
+        "label": "Android: 샘플 앱 실행",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder:dev-scripts}/rokid-dev.ps1", "android-launch"],
+        "problemMatcher": [],
+        "detail": "설치된 GlassesBareDevSample 을 안경에서 엽니다."
+      },
+      {
+        "label": "도구: 버전 확인",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder:dev-scripts}/rokid-dev.ps1", "versions"],
+        "problemMatcher": [],
+        "detail": "이 작업공간이 사용하는 Node.js, AIX CLI, ADB, JDK, Android SDK 버전과 경로를 보여 줍니다."
+      }
+    ]
+  }
+}

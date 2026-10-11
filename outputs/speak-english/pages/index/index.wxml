@@ -1,0 +1,21 @@
+<view ink:if="{{screenBlank}}" class="screen" bindtap="onAction"></view>
+<view ink:if="{{!screenBlank}}" class="screen" bindtap="onInteraction">
+  <view class="heading">
+    <text class="title">영어 통역</text>
+    <text class="status">{{status}}</text>
+  </view>
+  <scroll-view class="result-area" scroll-y="true" scroll-top="{{scrollTop}}">
+    <view class="content">
+      <text ink:if="{{english}}" class="english">{{english}}</text>
+      <text ink:if="{{korean}}" class="source-label">인식한 한국어</text>
+      <text ink:if="{{korean}}" class="korean">{{korean}}</text>
+      <text ink:if="{{error}}" class="error">{{error}}</text>
+      <text ink:if="{{phase === 'idle'}}" class="instruction">버튼을 누르고 한국어로 말하세요.</text>
+      <text ink:if="{{phase === 'listening'}}" class="instruction">다시 누르면 입력을 마칩니다.</text>
+    </view>
+  </scroll-view>
+  <view class="controls">
+    <button class="action" bindtap="onAction" tabindex="0">{{actionLabel}}</button>
+    <text class="hint">탭: 시작·종료 / 밀기: 스크롤 / 뒤로: 취소·닫기</text>
+  </view>
+</view>
