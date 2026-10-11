@@ -1,6 +1,6 @@
-# My Translate
+# Lingo
 
-Open pages/index/index when explicitly asked open my translate, My Translate, or 마이 트랜슬레이트. This renames the existing unified app; no new Agent is needed.
+Open pages/index/index when explicitly asked open Lingo, Lingo, or 링고. This renames the existing unified app; no new Agent is needed.
 Do not register generic 통역, translate or translation requests as this app's launch commands; those may refer to the built-in translator.
 Use the full-screen interactive page, never a conversation-only substitute.
 

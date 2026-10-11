@@ -414,7 +414,7 @@ export default {
         const detail = typeof event.message === 'string' ? event.message : '';
         const hostMissing = /Host capability speech\.[\w.]+ is not configured on Web host/.test(detail);
         // Log only the error category, never transcripts or provider response details.
-        console.warn('[My Translate] speech error:', code.replace(/[^a-z-]/g, '').slice(0, 48), hostMissing ? 'unconfigured-web-host' : 'recognition-failed');
+        console.warn('[Lingo] speech error:', code.replace(/[^a-z-]/g, '').slice(0, 48), hostMissing ? 'unconfigured-web-host' : 'recognition-failed');
         let message = '음성 인식에 실패했습니다. 연결을 확인하고 다시 말해 주세요.';
         if (hostMissing) {
           message = '이 미리보기에는 음성 인식 서비스가 연결되어 있지 않습니다. 서비스가 연결된 시뮬레이터나 안경에서 테스트해 주세요.';

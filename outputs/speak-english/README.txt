@@ -1,7 +1,7 @@
-My Translate — 버전 0.3.0
+Lingo — 버전 0.3.1
 
-기존 통합 앱 Speak Translate의 이름을 My Translate로 바꿨습니다.
-호출은 "Hi Rokid, open my translate"입니다. 일반적인 "통역" 호출은 앱 실행 정의에서 제외했습니다.
+기존 통합 앱의 이름을 Lingo(링고)로 바꿨습니다.
+호출은 "Hi Rokid, open Lingo"입니다. 일반적인 "통역" 호출은 앱 실행 정의에서 제외했습니다.
 실제 호출 분기는 Rokid 호스트가 결정하므로 안경에서 확인해야 합니다.
 폴더 outputs/speak-english, VS Code 작업공간과 기본 개발 명령은 그대로 사용합니다.
 기존 Speak French는 호환용으로 남아 있지만 새 통합 앱에서 프랑스어도 선택할 수 있습니다.
@@ -34,9 +34,9 @@ My Translate — 버전 0.3.0
 - outputs/development-setup.txt의 설치·사용 안내를 참고하세요.
 - powershell -NoProfile -ExecutionPolicy Bypass -File outputs/scripts/rokid-dev.ps1 check
 - 같은 명령의 check를 preview 또는 pack으로 바꾸어 미리보기/패키징합니다.
-- AIUI Studio 기존 통합 Agent에 소스와 이름 My Translate를 반영하고 AIX Packaging 후 Save Details합니다.
+- AIUI Studio 기존 통합 Agent에 소스와 이름 Lingo를 반영하고 AIX Packaging 후 Save Details합니다.
 - 휴대폰 Hi Rokid > Settings > Developer Options > AIUI > Update glasses resource 실행 후 다운로드 완료를 확인합니다.
-- 안경에서 "Hi Rokid, open my translate"로 엽니다. 개인 테스트에는 Submit for Review나 개발 케이블이 필요하지 않습니다.
+- 안경에서 "Hi Rokid, open Lingo"로 엽니다. 개인 테스트에는 Submit for Review나 개발 케이블이 필요하지 않습니다.
 
 검증 범위
 - 제어 로직 19개 + 타이머 5개 + 준비·스트리밍 13개 모의 검사, 구문·JSON·AIX 패키징 사전 검사를 통과했습니다.

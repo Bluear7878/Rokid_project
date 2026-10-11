@@ -1,8 +1,8 @@
 {
-  "agentName": "My Translate",
-  "agentDesc": "My Translate: a custom button-activated Korean translator for English, Simplified Chinese and French. Say open my translate to launch.",
-  "agentPrompt": "Launch this custom app when the user explicitly asks open my translate, My Translate, or 마이 트랜슬레이트. Open the full-screen pages/index/index page. Do not claim generic translate or translation requests intended for the built-in translator. All controls are Korean and input is fixed to ko-KR. The user selects the target language with buttons and starts each recording explicitly. Prepare a translation session during recording, then show streamed translation from the final recognized text. French offers optional approximate Hangul reading. Use the page, not a chat answer. Back closes this app; one minute of inactivity only clears its display.",
-  "version": "0.3.0",
+  "agentName": "Lingo",
+  "agentDesc": "Lingo: a custom button-activated Korean translator for English, Simplified Chinese and French. Say open Lingo to launch.",
+  "agentPrompt": "Launch this custom app when the user explicitly asks open Lingo, Lingo, or 링고. Open the full-screen pages/index/index page. Do not claim generic translate or translation requests intended for the built-in translator. All controls are Korean and input is fixed to ko-KR. The user selects the target language with buttons and starts each recording explicitly. Prepare a translation session during recording, then show streamed translation from the final recognized text. French offers optional approximate Hangul reading. Use the page, not a chat answer. Back closes this app; one minute of inactivity only clears its display.",
+  "version": "0.3.1",
   "engine": ">=0.18.0",
   "pages": [
     "pages/index/index"
@@ -11,6 +11,6 @@
     "RECORD_AUDIO"
   ],
   "window": {
-    "navigationBarTitleText": "My Translate"
+    "navigationBarTitleText": "Lingo"
   }
 }
