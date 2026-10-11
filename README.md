@@ -1,47 +1,51 @@
-# Rokid Glasses 앱
+# Rokid Glasses Apps
 
-화면이 있는 Rokid Glasses(YodaOS-Sprite, Android 12)용 AIUI 앱입니다.
+**English** | [한국어](README.ko.md) | [简体中文](README.zh-CN.md)
 
-| 앱 | 폴더 | 하는 일 |
+AIUI apps for display-equipped Rokid Glasses (YodaOS-Sprite, Android 12).
+
+| App | Folder | What it does |
 |---|---|---|
-| Speak English (영어 통역) | `outputs/speak-english` | 버튼을 누르고 한국어로 말하면 영어 자막으로 번역 |
-| Speak French | `outputs/speak-french` | 한국어를 프랑스어로 번역, 한글 발음 표기는 선택 |
+| Speak English | `outputs/speak-english` | Press the button, speak Korean, and read the English translation as subtitles |
+| Speak French | `outputs/speak-french` | Translates Korean speech into French, with an optional approximate pronunciation written in Hangul |
 
-실제 안경에서의 한국어 음성 인식과 번역은 아직 검증하지 못했습니다. 로컬 검사는 모의 음성·번역 API를 씁니다.
+Korean speech recognition and translation have not been verified on real glasses yet. The local checks use mocked speech and translation APIs.
 
-## 폴더
+## Layout
 
-- `outputs/speak-english`, `outputs/speak-french`: 앱 소스. 앱별 설명은 각 폴더의 `README.txt`
-- `outputs/scripts/rokid-dev.ps1`: 검사, 미리보기, 패키징, 기기 설치를 실행하는 스크립트
-- `outputs/development-setup.txt`: 개발 환경 설치와 사용법 전체
-- `work/`: 개발 도구(Node.js, AIX CLI, JDK, Android SDK)와 임시 파일. 저장소에 넣지 않습니다.
+- `outputs/speak-english`, `outputs/speak-french`: app source. Each folder has its own `README.txt` (in Korean).
+- `outputs/scripts/rokid-dev.ps1`: runs checks, preview, packaging and device install
+- `outputs/development-setup.txt`: the full setup and usage guide (in Korean)
+- `work/`: development tools (Node.js, AIX CLI, JDK, Android SDK) and temporary files. Not in the repository.
 
-새 PC에서는 `outputs/development-setup.txt` 3장의 버전대로 `work/`에 도구를 다시 설치해야 스크립트가 동작합니다.
+On a new PC, reinstall the tools into `work/` using the versions listed in section 3 of `outputs/development-setup.txt`. The script expects to find them there.
 
-## 자주 쓰는 명령
+## Common commands
+
+Windows PowerShell:
 
 ```powershell
 $s = 'outputs\scripts\rokid-dev.ps1'
-powershell -NoProfile -ExecutionPolicy Bypass -File $s check                        # 소스 검사 (speak-english)
-powershell -NoProfile -ExecutionPolicy Bypass -File $s check -Project speak-french  # 다른 앱
-powershell -NoProfile -ExecutionPolicy Bypass -File $s preview -Open                # 화면 미리보기
-powershell -NoProfile -ExecutionPolicy Bypass -File $s pack                         # AIX 패키지 만들기
+powershell -NoProfile -ExecutionPolicy Bypass -File $s check                        # check the source (speak-english)
+powershell -NoProfile -ExecutionPolicy Bypass -File $s check -Project speak-french  # the other app
+powershell -NoProfile -ExecutionPolicy Bypass -File $s preview -Open                # screen preview
+powershell -NoProfile -ExecutionPolicy Bypass -File $s pack                         # build the AIX package
 ```
 
-## 버전
+## Versions
 
-- 앱 버전은 각 앱의 `app.json`과 `package.json`의 `version`입니다. 두 값을 함께 올립니다.
-- 안경에 올린 버전에는 `<앱 폴더 이름>-v<버전>` 태그를 붙입니다. 예: `speak-english-v0.1.1`
+- An app's version is the `version` field in its `app.json` and `package.json`. Bump both together.
+- A version that was published to AIUI Studio or installed on the glasses gets a tag named `<app folder>-v<version>`, for example `speak-english-v0.1.1`.
 
-## 안경에 올리기
+## Putting an app on the glasses
 
-이 저장소를 고쳐도 안경에는 자동으로 반영되지 않습니다.
+Changes in this repository do not reach the glasses automatically.
 
-1. AIUI Studio(https://aiui-global.rokid.com)의 해당 Agent에 소스를 반영하고 AIX Packaging을 실행합니다.
-2. 휴대폰 Hi Rokid 앱 > Settings > Developer Options > AIUI > Update glasses resource를 실행합니다.
+1. Update the matching Agent in AIUI Studio (https://aiui-global.rokid.com) with the source, then run AIX Packaging.
+2. In the Hi Rokid phone app, run Settings > Developer Options > AIUI > Update glasses resource.
 
-개발 케이블이 있으면 `rokid-dev.ps1 install-launch`로 Studio를 거치지 않고 바로 올릴 수 있습니다.
+With a Rokid development cable, `rokid-dev.ps1 install-launch` installs over ADB without going through Studio. This path has not been tested yet.
 
-## 주의
+## Note
 
-각 앱 폴더의 `AGENTS.md`는 안경에서 도는 Agent의 동작 정의이며 AIX 패키지에 들어갑니다. 코딩 agent에게 주는 지시 파일이 아닙니다.
+The `AGENTS.md` inside each app folder defines how the Agent behaves on the glasses, and it ships inside the AIX package. It is not an instruction file for coding agents. The `AGENTS.md` at the repository root is the one for coding agents.
