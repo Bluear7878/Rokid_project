@@ -7,6 +7,7 @@
   <view ink:if="{{!modeChosen}}" class="menu">
     <text class="instruction">{{menuTitle}}</text>
     <text class="source-label">입력은 한국어입니다.</text>
+    <text ink:if="{{menuStep === 'pronunciation' && targetCode === 'zh'}}" class="source-label">한글 표기는 근사 발음이며 성조는 표시하지 않습니다.</text>
     <view ink:if="{{menuStep === 'target'}}" class="menu">
       <button class="{{selectedCode === 'en' ? 'action selected' : 'action'}}" bindtap="pickEnglish" tabindex="0">{{selectedCode === 'en' ? '선택 · 영어' : '영어'}}</button>
       <button class="{{selectedCode === 'zh' ? 'action selected' : 'action'}}" bindtap="pickChinese" tabindex="0">{{selectedCode === 'zh' ? '선택 · 중국어 · 간체' : '중국어 · 간체'}}</button>
@@ -23,7 +24,7 @@
     <view class="content">
       <text ink:if="{{translation}}" class="translation">{{translation}}</text>
       <text ink:if="{{phase === 'translating' && translation}}" class="source-label">번역을 받는 중입니다.</text>
-      <text ink:if="{{showPronunciation && pronunciation}}" class="source-label">한글 발음 (근사 표기)</text>
+      <text ink:if="{{showPronunciation && pronunciation}}" class="source-label">{{targetCode === 'zh' ? '한글 발음 (근사 표기 · 성조 미표시)' : '한글 발음 (근사 표기)'}}</text>
       <text ink:if="{{showPronunciation && pronunciation}}" class="pronunciation">{{pronunciation}}</text>
       <text ink:if="{{sourceText}}" class="source-label">인식한 한국어</text>
       <text ink:if="{{sourceText}}" class="korean">{{sourceText}}</text>

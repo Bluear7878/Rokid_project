@@ -50,7 +50,7 @@ function setup(target = 'en', reading = false) {
   const p={...pageDefinition, data:structuredClone(pageDefinition.data),setData(v){Object.assign(this.data,v);}};
   p.onLoad();p.onShow();
   if(target) p.chooseLanguage(target);
-  if(target==='fr') p.chooseMode(reading);
+  if(target==='fr'||target==='zh') p.chooseMode(reading);
   return p;
 }
 function start(p) { now+=500;p.onAction(); }
@@ -76,6 +76,13 @@ await test('Translation arrives before completion; French reading waits for vali
   await drain();assert.equal(p.data.phase,'done');assert.equal(p.data.pronunciation,'봉주르.');
   assert.equal(timers.get(p._screenTimer).ms,60000);p.onUnload();
 });
+await test('Chinese translation streams first and Hangul reading appears only after full validation',async()=>{
+  const p=setup('zh',true);
+  streamImpl=()=>buffered(['{"translation":"你','好。","pronunciation":"니 ','하오."}']);
+  start(p);end();await flush();assert.equal(p.data.translation,'你');assert.equal(p.data.pronunciation,'');
+  await poll();assert.equal(p.data.translation,'你好。');assert.equal(p.data.pronunciation,'');
+  await drain();assert.equal(p.data.phase,'done');assert.equal(p.data.pronunciation,'니 하오.');p.onUnload();
+});
 await test('Partial JSON handles fences, quotes, backslashes, split unicode and surrogate pairs',()=>{
   const raw=JSON.stringify({translation:'你好 "café" \\ 😀',pronunciation:'봉주르.'});
   for(let i=0;i<=raw.length;i++) {
@@ -95,9 +102,33 @@ await test('An empty polling read yields to the event loop; Back cancels its wai
   assert.equal(stream.reads,1);assert.equal(timers.get(p._pollTimer).ms,25);
   await flush();assert.equal(stream.reads,1);await poll();assert.equal(stream.reads,2);
   let closes=0;globalThis.window={close(){closes++;}};
-  p.onKeyUp({code:'Backspace',preventDefault(){}});await flush();
+  p.onKeyUp({code:'Backspace',preventDefault(){throw Error('Native Back must remain available');}});await flush();
   assert.equal(closes,1);assert.equal(stream.cancelled,1);assert.equal(s.destroyed,1);
   assert.equal(timers.size,0);assert.equal(stream.reads,2);p.onUnload();delete globalThis.window;
+});
+await test('Back during an unresolved stream read reaches the host before cleanup, ignores late chunks and never redraws',async()=>{
+  const p=setup(), waiting=deferred(), order=[];
+  streamImpl=()=>({read(){return waiting.promise;},cancel(){order.push('cancel');throw Error('cancel failed');}});
+  start(p);end();await flush();const s=sessions[0];
+  s.destroy=()=>{s.destroyed++;order.push('destroy');};
+  globalThis.window={close(){order.push('close');}};
+  p.setData=()=>{throw Error('Exit must not need a render');};
+  p.onKeyUp({code:'Backspace',preventDefault(){throw Error('Native Back blocked');}});
+  assert.deepEqual(order,['close','cancel','destroy']);assert.equal(timers.size,0);
+  waiting.resolve({done:true,value:'{"translation":"Too late"}'});await flush();
+  assert.equal(p.data.translation,'');assert.equal(s.destroyed,1);
+  p.onKeyUp({code:'Backspace',preventDefault(){throw Error('Repeated Back blocked');}});
+  assert.deepEqual(order,['close','cancel','destroy','close']);p.onUnload();delete globalThis.window;
+});
+await test('Back during model preparation leaves native exit available and destroys a late session without prompting',async()=>{
+  const p=setup(), ready=deferred();createImpl=()=>ready.promise;
+  start(p);end();await flush();assert.equal(p.data.phase,'translating');
+  let closes=0;globalThis.window={close(){closes++;}};
+  p.onKeyUp({code:'Backspace',preventDefault(){throw Error('Native Back blocked');}});
+  assert.equal(closes,1);assert.equal(timers.size,0);
+  const late=session({});ready.resolve(late);await flush();
+  assert.equal(late.destroyed,1);assert.deepEqual(requests,[]);assert.equal(p._visible,false);
+  p.onUnload();delete globalThis.window;
 });
 await test('Late prepared session after cancel is destroyed without replacing the next turn',async()=>{
   const p=setup(), ready=deferred();createImpl=()=>ready.promise;

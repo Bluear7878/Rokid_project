@@ -42,7 +42,7 @@ const flush = async () => { for (let i = 0; i < 12; i += 1) await Promise.resolv
 function page(target = 'en', reading = false) {
   availability = 'available'; createOverride = undefined; responseOverride = undefined;
   const p = {...pageDefinition, data: structuredClone(pageDefinition.data), setData(patch) { Object.assign(this.data, patch); }};
-  p.onLoad(); p.onShow(); if (target) p.chooseLanguage(target); if (target === 'fr') p.chooseMode(reading); clock += 500; return p;
+  p.onLoad(); p.onShow(); if (target) p.chooseLanguage(target); if (target === 'fr' || target === 'zh') p.chooseMode(reading); clock += 500; return p;
 }
 function action(p) { clock += 500; p.onAction(); }
 function key(p, code) { let prevented = false; p.onKeyUp({code, preventDefault() { prevented = true; }}); return prevented; }
@@ -90,20 +90,21 @@ await test('Unconfigured web host is distinct from a network failure and release
   action(p); recognitions.at(-1).onerror({error: 'network', message: 'Connection failed'});
   assert.equal(p.data.phase, 'error'); assert.match(p.data.error, /인터넷 연결/); p.onUnload();
 });
-await test('One Back releases capture and closes once, ignoring late callbacks and reopening', () => {
+await test('Back requests close without blocking native Back or later close attempts', () => {
   const p = page(); let closes = 0; globalThis.window = {close() { closes++; }};
   action(p); const r = recognitions.at(-1), late = r.onresult;
-  assert.equal(key(p, 'Backspace'), true); assert.equal(closes, 1); assert.equal(r.aborts, 1);
+  assert.equal(key(p, 'Backspace'), false); assert.equal(closes, 1); assert.equal(r.aborts, 1);
   assert.equal(p._visible, false); assert.equal(p._timer, null); assert.equal(p._screenTimer, null);
   late({results:[]}); p.onShow(); action(p); assert.equal(p._visible, false);
-  key(p, 'Backspace'); assert.equal(closes, 1); p.onUnload(); delete globalThis.window;
+  assert.equal(key(p, 'Backspace'), false); assert.equal(closes, 2); assert.equal(r.aborts, 1);
+  p.onUnload(); delete globalThis.window;
 });
 await test('Back closes menu, idle, result, error and blank screens without debounce', () => {
   for (const phase of ['choosing','idle','done','error']) {
     const p = page(); let closes = 0; globalThis.window = {close() { closes++; }};
     p.setPhase(phase); p._lastAction = Date.now();
     if (phase === 'idle') p.setData({screenBlank:true});
-    assert.equal(key(p, 'Backspace'), true); assert.equal(closes, 1); assert.equal(p._screenTimer, null);
+    assert.equal(key(p, 'Backspace'), false); assert.equal(closes, 1); assert.equal(p._screenTimer, null);
     p.onUnload(); delete globalThis.window;
   }
 });
@@ -116,11 +117,26 @@ await test('Back destroys pending translation and ignores its late result', asyn
   resolvePrompt('late'); await flush(); assert.equal(p._visible,false); assert.equal(session.destroyed,1);
   p.onUnload(); delete globalThis.window;
 });
-await test('Finish fallback works and failed close leaves native Back available', () => {
+await test('Finish fallback and failed close preserve native Back without reopening the app', () => {
   const p=page(); let finishes=0; p.finish=()=>{finishes++;};
-  assert.equal(key(p,'Backspace'),true); assert.equal(finishes,1); p.onUnload();
+  assert.equal(key(p,'Backspace'),false); assert.equal(finishes,1); p.onUnload();
   const q=page(); globalThis.window={close(){throw Error('host');}};
-  assert.equal(key(q,'Backspace'),false); assert.match(q.data.error,/종료/); q.onUnload(); delete globalThis.window;
+  assert.equal(key(q,'Backspace'),false); assert.equal(q._visible,false); q.onUnload();
+  const r=page(); r.finish=()=>{finishes++;};
+  assert.equal(key(r,'Backspace'),false); assert.equal(finishes,2); r.onUnload(); delete globalThis.window;
+});
+await test('Close is requested before cleanup and does not depend on a successful render', () => {
+  const p=page(), order=[]; action(p); const r=recognitions.at(-1);
+  globalThis.window={close(){order.push('close');}};
+  r.abort=()=>{order.push('abort');throw Error('host cleanup');};
+  p.setData=()=>{throw Error('unavailable renderer');};
+  assert.equal(key(p,'Backspace'),false);assert.deepEqual(order,['close','abort']);
+  assert.equal(p._visible,false);assert.equal(p._recognition,null);
+  p.onUnload();delete globalThis.window;
+});
+await test('A host with no explicit close API still receives native Back', () => {
+  const p=page();assert.equal(key(p,'Backspace'),false);
+  assert.equal(p._visible,false);assert.equal(p._screenTimer,null);p.onUnload();
 });
 await test('Hide cancels capture and ignores an already queued callback', () => {
   const p = page(); action(p); const r = recognitions.at(-1); const late = r.onresult;
@@ -163,16 +179,29 @@ await test('Korean menu selects exactly three targets without starting speech or
   assert.equal(recognitions.length,before); assert.equal(sessions.length,models); p.onUnload();
 });
 await test('All targets request Korean recognition and only the selected translation format', async () => {
-  for(const [target,reading,output] of [['en',false,'Hello.'],['zh',false,'你好。'],['fr',false,'Bonjour.'],['fr',true,'Bonjour.']]) {
+  for(const [target,reading,output,pronunciation] of [['en',false,'Hello.',''],['zh',false,'你好。',''],['zh',true,'你好。','니 하오.'],['fr',false,'Bonjour.',''],['fr',true,'Bonjour.','봉주르.']]) {
     const p=page(target,reading);
-    responseOverride=()=>JSON.stringify(reading?{translation:output,pronunciation:'봉주르.'}:{translation:output});
+    responseOverride=()=>JSON.stringify(reading?{translation:output,pronunciation}:{translation:output});
     action(p);const r=recognitions.at(-1);assert.equal(r.lang,'ko-KR');r.result('안녕하세요.');r.onend();await flush();
-    assert.equal(p.data.phase,'done');assert.equal(p.data.translation,output);assert.equal(p.data.pronunciation,reading?'봉주르.':'');
+    assert.equal(p.data.phase,'done');assert.equal(p.data.translation,output);assert.equal(p.data.pronunciation,pronunciation);
     const prompt=sessions.at(-1).options.initialPrompts[0].content;
     assert.equal(prompt,translationPrompt('ko',target,reading));
     if(!reading) assert.match(prompt,/Do not generate any pronunciation/);
     p.onUnload();
   }
+});
+await test('Chinese offers both reading modes without recording and requests Mandarin rather than Sino-Korean readings', () => {
+  for(const reading of [true,false]) {
+    const p=page(null), before=recognitions.length, models=sessions.length;p.pickChinese();
+    assert.equal(p.data.modeChosen,false);assert.equal(p.data.menuStep,'pronunciation');assert.match(p.data.menuTitle,/중국어/);
+    if(!reading) key(p,'ArrowDown');action(p);
+    assert.equal(p.data.showPronunciation,reading);assert.equal(p.data.modeChosen,true);
+    assert.equal(recognitions.length,before);assert.equal(sessions.length,models);p.onUnload();
+  }
+  const prompt=translationPrompt('ko','zh',true);
+  assert.match(prompt,/standard Mandarin/);assert.match(prompt,/never as Korean readings/);
+  assert.match(prompt,/Do not output pinyin or tone numbers/);assert.doesNotMatch(prompt,/French|liaison/);
+  assert.match(translationPrompt('ko','fr',true),/liaison/);
 });
 await test('Translation contracts reject unsupported input, malformed JSON and unwanted reading', () => {
   assert.throws(()=>translationPrompt('en','fr'));assert.throws(()=>translationPrompt('ko','ko'));

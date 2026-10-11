@@ -6,14 +6,14 @@ AIUI apps for display-equipped Rokid Glasses (YodaOS-Sprite, Android 12).
 
 | App | Folder | What it does |
 |---|---|---|
-| Speak Korean 0.3.3 | `outputs/speak-english` | Korean speech to English, Simplified Chinese or French; optional Hangul reading for French |
+| Speak Korean 0.4.0 | `outputs/speak-english` | Korean speech to English, Simplified Chinese or French; optional Hangul reading for Chinese and French |
 | Speak French 0.1.2 (legacy) | `outputs/speak-french` | Standalone French app retained with the same Back-to-close fix |
 
-Speak Korean updates the existing Speak English Agent. The source folder and default commands remain unchanged. Input is fixed to Korean (`ko-KR`); all menus are Korean and use buttons/swipes without language detection or voice commands. One Back requests app closure from every screen. After 60 seconds of inactivity, the display clears while the app remains open. Reopen the app to choose another target.
+Speak Korean updates the existing Speak English Agent. The source folder and default commands remain unchanged. Input is fixed to Korean (`ko-KR`); all menus are Korean and use buttons/swipes without language detection or voice commands. Back requests app closure from every screen, including pending translation. It keeps native Back available, sends close before host cleanup, and ignores late results without repainting. After 60 seconds of inactivity, the display clears while the app remains open. Reopen the app to choose another target.
 
 Korean speech recognition, translation, latency and actual Back-to-close behavior have not been verified on real glasses yet. The local checks use mocked speech and translation APIs.
 
-Request launch with "Hi Rokid, open Speak Korean" or "스피크 코리안 열어 줘". Metadata follows the working French app: descriptions state capabilities, the Korean opening message explains first use, and the Agent prompt defines page launch. The app prepares a fresh model session while recording and displays streamed translation before the whole response completes. French reading appears after final validation. Hosts without streaming use one final response. Actual launch routing and latency improvements still require a glasses test.
+Request launch with "Hi Rokid, open Speak Korean" or "스피크 코리안 열어 줘". Metadata follows the working French app: descriptions state capabilities, the Korean opening message explains first use, and the Agent prompt defines page launch. The app prepares a fresh model session while recording and displays streamed translation before the whole response completes. Chinese and French reading appears after final validation. Mandarin tones are not represented in Hangul. Hosts without streaming use one final response. Launch worked on glasses with the previous metadata update; the new Chinese reading and Back behavior still require a glasses test. Latency improvements have not been measured.
 
 ## Layout
 
