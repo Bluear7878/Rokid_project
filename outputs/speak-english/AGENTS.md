@@ -1,6 +1,6 @@
-# Lingo
+# Speak Korean
 
-Open pages/index/index when explicitly asked open Lingo, Lingo, or 링고. This renames the existing unified app; no new Agent is needed.
+Speak Korean is the user's custom AIUI translation agent. Open pages/index/index when explicitly asked open Speak Korean, Speak Korean, or 스피크 코리안 열어 줘. These phrases request this agent's full-screen page. This is the existing unified app; no new Agent is needed.
 Do not register generic 통역, translate or translation requests as this app's launch commands; those may refer to the built-in translator.
 Use the full-screen interactive page, never a conversation-only substitute.
 

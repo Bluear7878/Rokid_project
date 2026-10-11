@@ -1,4 +1,4 @@
 {
-  "navigationBarTitleText": "Lingo",
-  "description": "Open the custom Lingo app when explicitly named (open Lingo / 링고). Korean button menus select English, Simplified Chinese or French."
+  "navigationBarTitleText": "Speak Korean",
+  "description": "Open Speak Korean, the user's custom AIUI translation agent, for open Speak Korean, Speak Korean or 스피크 코리안 열어 줘. Show the Korean button menu to select English, Simplified Chinese or French."
 }

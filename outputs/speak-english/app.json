@@ -1,8 +1,8 @@
 {
-  "agentName": "Lingo",
-  "agentDesc": "Lingo: a custom button-activated Korean translator for English, Simplified Chinese and French. Say open Lingo to launch.",
-  "agentPrompt": "Launch this custom app when the user explicitly asks open Lingo, Lingo, or 링고. Open the full-screen pages/index/index page. Do not claim generic translate or translation requests intended for the built-in translator. All controls are Korean and input is fixed to ko-KR. The user selects the target language with buttons and starts each recording explicitly. Prepare a translation session during recording, then show streamed translation from the final recognized text. French offers optional approximate Hangul reading. Use the page, not a chat answer. Back closes this app; one minute of inactivity only clears its display.",
-  "version": "0.3.1",
+  "agentName": "Speak Korean",
+  "agentDesc": "Speak Korean is the user's custom AIUI translation agent. Say open Speak Korean to launch. Button-activated Korean speech to English, Simplified Chinese or French.",
+  "agentPrompt": "Speak Korean is the user's custom AIUI translation agent. When the user asks open Speak Korean, Speak Korean, or 스피크 코리안 열어 줘, open this agent's full-screen pages/index/index page. These are launch requests for Speak Korean. Do not claim generic translate or translation requests intended for the built-in translator. All controls are Korean and input is fixed to ko-KR. The user selects the target language with buttons and starts each recording explicitly. Prepare a translation session during recording, then show streamed translation from the final recognized text. French offers optional approximate Hangul reading. Use the page, not a chat answer. Back closes this app; one minute of inactivity only clears its display.",
+  "version": "0.3.2",
   "engine": ">=0.18.0",
   "pages": [
     "pages/index/index"
@@ -11,6 +11,6 @@
     "RECORD_AUDIO"
   ],
   "window": {
-    "navigationBarTitleText": "Lingo"
+    "navigationBarTitleText": "Speak Korean"
   }
 }

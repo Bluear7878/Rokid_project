@@ -1,7 +1,7 @@
 <view ink:if="{{screenBlank}}" class="screen" bindtap="onAction"></view>
 <view ink:if="{{!screenBlank}}" class="screen" bindtap="onInteraction">
   <view class="heading">
-    <text class="title">Lingo</text>
+    <text class="title">Speak Korean</text>
     <text class="status">{{status}}</text>
   </view>
   <view ink:if="{{!modeChosen}}" class="menu">
