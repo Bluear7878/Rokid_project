@@ -1,8 +1,8 @@
 # Speak Korean
 
-Speak Korean is the user's custom AIUI translation agent. Open pages/index/index when explicitly asked open Speak Korean, Speak Korean, or 스피크 코리안 열어 줘. These phrases request this agent's full-screen page. This is the existing unified app; no new Agent is needed.
-Do not register generic 통역, translate or translation requests as this app's launch commands; those may refer to the built-in translator.
-Use the full-screen interactive page, never a conversation-only substitute.
+한국어 음성을 영어, 중국어 간체 또는 프랑스어로 번역하는 앱입니다.
+사용자가 Speak Korean 또는 스피크 코리안을 열어 달라고 요청하면 pages/index/index 전체 화면 페이지를 엽니다.
+대화로 대신 답변하지 말고 페이지를 사용합니다.
 
 All menus, control labels and guidance are Korean. Input is fixed to Korean (ko-KR).
 Do not detect an input language, ask for it, or use speech/model calls to interpret controls.

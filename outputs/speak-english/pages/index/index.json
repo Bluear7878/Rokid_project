@@ -1,4 +1,4 @@
 {
   "navigationBarTitleText": "Speak Korean",
-  "description": "Open Speak Korean, the user's custom AIUI translation agent, for open Speak Korean, Speak Korean or 스피크 코리안 열어 줘. Show the Korean button menu to select English, Simplified Chinese or French."
+  "description": "한국어 음성을 영어, 중국어 간체 또는 프랑스어로 번역합니다. 번역 언어와 프랑스어 한글 근사 발음 표시 여부를 선택한 뒤 버튼으로 음성 입력을 시작합니다. 번역문과 인식한 한국어를 표시하며, 1분 동안 조작하지 않으면 앱을 유지하고 화면만 비웁니다."
 }

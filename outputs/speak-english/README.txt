@@ -1,8 +1,8 @@
-Speak Korean — 버전 0.3.2
+Speak Korean — 버전 0.3.3
 
-기존 통합 앱의 이름을 Speak Korean(스피크 코리안)로 바꿨습니다.
-호출 문구는 "Hi Rokid, open Speak Korean"입니다. 일반적인 "통역" 호출은 앱 실행 정의에서 제외했습니다.
-실제 호출 분기는 Rokid 호스트가 결정하므로 안경에서 확인해야 합니다.
+기존 통합 앱의 이름을 Speak Korean(스피크 코리안)으로 바꿨습니다.
+호출 문구는 "Hi Rokid, open Speak Korean" 또는 "스피크 코리안 열어 줘"입니다.
+French와 같은 역할 구분으로 정리했습니다. 설명에는 기능만 적고, 앱 실행 지시는 Agent 프롬프트와 AGENTS.md에 둡니다. 시작 안내는 한국어로 제공합니다. 실제 호출 분기는 Rokid 호스트가 결정하므로 안경에서 확인해야 합니다.
 폴더 outputs/speak-english, VS Code 작업공간과 기본 개발 명령은 그대로 사용합니다.
 기존 Speak French는 호환용으로 남아 있지만 새 통합 앱에서 프랑스어도 선택할 수 있습니다.
 
@@ -34,7 +34,7 @@ Speak Korean — 버전 0.3.2
 - outputs/development-setup.txt의 설치·사용 안내를 참고하세요.
 - powershell -NoProfile -ExecutionPolicy Bypass -File outputs/scripts/rokid-dev.ps1 check
 - 같은 명령의 check를 preview 또는 pack으로 바꾸어 미리보기/패키징합니다.
-- AIUI Studio 기존 통합 Agent에 소스와 이름 Speak Korean를 반영하고 AIX Packaging 후 Save Details합니다.
+- AIUI Studio 기존 통합 Agent에 소스와 이름 Speak Korean을 반영하고 AIX Packaging 후 Save Details합니다.
 - 휴대폰 Hi Rokid > Settings > Developer Options > AIUI > Update glasses resource 실행 후 다운로드 완료를 확인합니다.
 - 안경에서 "Hi Rokid, open Speak Korean"로 실행을 요청합니다. 개인 테스트에는 Submit for Review나 개발 케이블이 필요하지 않습니다.
 
@@ -46,6 +46,11 @@ Speak Korean — 버전 0.3.2
 
 음성 재생, 화자 식별, 상시 녹음, 원음·번역 기록 저장은 하지 않습니다.
 기존 Rokid/Hi Rokid SpeechRecognition과 LanguageModel만 사용합니다. 외부 공급자나 API 키를 추가하지 않았습니다.
+
+Studio 기본 정보
+- Agent Name: Speak Korean
+- Opening Message: 번역할 언어를 고른 다음 버튼을 누르고 한국어로 말하세요. 프랑스어는 한글 근사 발음 표시 여부도 선택할 수 있습니다. 뒤로가기를 누르면 종료합니다.
+- Feature Description: 버튼을 누르고 말한 한국어를 영어, 중국어 간체 또는 프랑스어로 번역합니다. 번역문과 인식한 한국어를 함께 표시하며, 프랑스어는 한글 근사 발음을 선택할 수 있습니다. 한국어 메뉴를 버튼과 밀기로 조작합니다. 뒤로가기로 종료하고, 1분 동안 조작이 없으면 앱을 유지한 채 화면만 비웁니다. Rokid 음성 인식·번역 서비스를 사용하며 음성 재생과 기록 저장은 하지 않습니다.
 
 공식 문서
 https://js.rokid.com/AIUI/api/ai-speech-recognition?lang=en-US&version=latest
